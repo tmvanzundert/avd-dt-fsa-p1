@@ -10,4 +10,11 @@ fun Application.configureSerialization() {
     install(ContentNegotiation) {
         json()
     }
+    // Example route to test JSON serialization, can be removed later
+    // Can be accessed at http://localhost:8080/json/kotlinx-serialization
+    routing {
+        get("/json/kotlinx-serialization") {
+            call.respond(mapOf("hello" to "world"))
+        }
+    }
 }
