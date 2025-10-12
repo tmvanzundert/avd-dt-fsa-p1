@@ -13,10 +13,5 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("Hello World!")
         }
-        // HTTP GET route for the tail card pattern, this acts as a catch-all for any undefined routes.
-        // It redirects to the root path ("/").
-        get("{...}") {
-            call.respondRedirect("/", permanent = false)
-        }
     }
 }
