@@ -4,3 +4,9 @@ ktor:
             - com.example.ApplicationKt.module
     deployment:
         port: 8080
+    jwt:
+        secret : "secret"
+        issuer : "http://127.0.0.1:8080"
+        audience : "http://127.0.0.1:8080"
+        realm : "Access protected routes"
+        tokenExpiry : "86400000"
