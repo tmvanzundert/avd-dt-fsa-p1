@@ -29,5 +29,5 @@ fun Application.module() {
     configureSerialization()
     configureJWTAuthentication(config)
     configureRouting(config)
-
+    configureStatusPages()
 }
