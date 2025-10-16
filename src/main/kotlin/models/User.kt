@@ -1,18 +1,12 @@
 package com.example.models
 
-import kotlinx.serialization.Serializable
+object UserRepository {
 
-@Serializable
-data class User (
-    val id: Long = 0L,
-    val role: Role = Role.USER,
-    val username: String,
-    val password: String,
-    val email: String,
-    val rating: Float = 0.0f
-)
+    fun createUser(){}
 
-enum class Role {
-    USER,
-    ADMIN
+    fun updateUser(){}
+
+    fun deleteAccount(){}
+
 }
+
