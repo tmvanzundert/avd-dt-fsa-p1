@@ -1,14 +1,9 @@
 package com.example
 
-import com.example.plugins.JWTConfig
-import com.example.plugins.generateToken
-import io.ktor.http.HttpStatusCode
-import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
 import io.ktor.server.auth.authenticate
 import io.ktor.server.auth.jwt.JWTPrincipal
 import io.ktor.server.auth.principal
-import io.ktor.server.plugins.contentnegotiation.*
 import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*

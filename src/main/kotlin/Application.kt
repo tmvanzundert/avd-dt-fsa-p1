@@ -1,7 +1,5 @@
 package com.example
 
-import com.example.plugins.JWTConfig
-import com.example.plugins.configureJWTAuthentication
 import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
