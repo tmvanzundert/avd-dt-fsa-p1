@@ -1,12 +1,25 @@
 package com.example.models
 
-object UserRepository {
+import kotlinx.serialization.Serializable
+import java.util.UUID
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
-    fun createUser(){}
+@Serializable
+data class User @OptIn(ExperimentalTime::class) constructor(
+    val id: Long = 0L,
+    val name: String,
+    val role: Role = Role.USER,
+    val phone: String,
+    val password: String,
+    val email: String,
+    val rating: Float? = 0.0f,
+    val createdAt: Instant? = null,
+    val birthDate: Instant? = null,
+    val driverLicenseNumber: String
+)
 
-    fun updateUser(){}
-
-    fun deleteAccount(){}
-
+enum class Role {
+    USER,
+    ADMIN
 }
-
