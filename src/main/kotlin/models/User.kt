@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import java.util.UUID
 import kotlin.time.ExperimentalTime
 import kotlin.time.Instant
+import org.jetbrains.exposed.v1.core.Table
 
 object UserTable: Table("User") {
     val id = long("id").autoIncrement().primaryKey()
