@@ -36,18 +36,18 @@ abstract class UserDao: UserRepository<User, Long> {
 
         var users: List<User> = emptyList()
         transaction {
-            users = User.selectAll().map {
+            users = UserTable.selectAll().map {
                 User(
-                    id = it[User.id],
-                    name = it[User.name],
-                    role = it[User.role],
-                    phone = it[User.phone],
-                    password = it[User.password],
-                    email = it[User.email],
-                    rating = it[User.rating],
-                    createdAt = it[User.createdAt],
-                    birthDate = it[User.birthDate],
-                    driverLicenseNumber = it[User.driverLicenseNumber]
+                    id = it[UserTable.id],
+                    name = it[UserTable.name],
+                    role = it[UserTable.role],
+                    phone = it[UserTable.phone],
+                    password = it[UserTable.password],
+                    email = it[UserTable.email],
+                    rating = it[UserTable.rating],
+                    createdAt = it[UserTable.createdAt],
+                    birthDate = it[UserTable.birthDate],
+                    driverLicenseNumber = it[UserTable.driverLicenseNumber]
                 )
             }
         }
@@ -58,18 +58,18 @@ abstract class UserDao: UserRepository<User, Long> {
     override suspend fun findById(id: Long): User? {
         var user: User? = null
         transaction{
-            user = User.select { User.id eq id }.map {
+            user = UserTable.select { User.id eq id }.map {
                 User(
-                    id = it[User.id],
-                    name = it[User.name],
-                    role = it[User.role],
-                    phone = it[User.phone],
-                    password = it[User.password],
-                    email = it[User.email],
-                    rating = it[User.rating],
-                    createdAt = it[User.createdAt],
-                    birthDate = it[User.birthDate],
-                    driverLicenseNumber = it[User.driverLicenseNumber]
+                    id = it[UserTable.id],
+                    name = it[UserTable.name],
+                    role = it[UserTable.role],
+                    phone = it[UserTable.phone],
+                    password = it[UserTable.password],
+                    email = it[UserTable.email],
+                    rating = it[UserTable.rating],
+                    createdAt = it[UserTable.createdAt],
+                    birthDate = it[UserTable.birthDate],
+                    driverLicenseNumber = it[UserTable.driverLicenseNumber]
                 )
             }.firstOrNull()
         }
@@ -80,7 +80,7 @@ abstract class UserDao: UserRepository<User, Long> {
     override suspend fun create(entity: User) {
         var newUser: User? = null
         transaction {
-            newUser = User.insert {
+            newUser = UserTable.insert {
                 it[id] = entity.id
                 it[name] = entity.name
                 it[role] = entity.role
@@ -103,7 +103,7 @@ abstract class UserDao: UserRepository<User, Long> {
         val userId = findById(entity.id) ?: throw Exception("User not found")
 
         transaction {
-            User.update({ User.id eq userId.id }) {
+            UserTable.update({ User.id eq userId.id }) {
                 it[name] = entity.name
                 it[role] = entity.role
                 it[phone] = entity.phone
@@ -121,7 +121,7 @@ abstract class UserDao: UserRepository<User, Long> {
         val userId = findById(id) ?: throw Exception("User not found")
 
         transaction {
-            val deleteUser = User.deleteWhere { User.id eq userId.id }
+            val deleteUser = UserTable.deleteWhere { User.id eq userId.id }
         }
 
         if (deleteUser == 0) {
