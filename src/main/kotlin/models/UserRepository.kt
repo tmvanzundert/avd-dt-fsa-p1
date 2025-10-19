@@ -100,10 +100,10 @@ abstract class UserDao: UserRepository<User, Long> {
     }
 
     override suspend fun update(entity: User) {
-        val userId = findById(entity.id) ?: throw Exception("User not found")
+        val userId = findById(entity.id)?.id ?: throw Exception("User not found")
 
         transaction {
-            UserTable.update({ User.id eq userId.id }) {
+            UserTable.update({ User.id eq userId }) {
                 it[name] = entity.name
                 it[role] = entity.role
                 it[phone] = entity.phone
@@ -118,10 +118,10 @@ abstract class UserDao: UserRepository<User, Long> {
     }
 
     override suspend fun delete(id: Long) {
-        val userId = findById(id) ?: throw Exception("User not found")
+        val userId = findById(id)?.id ?: throw Exception("User not found")
 
         transaction {
-            val deleteUser = UserTable.deleteWhere { User.id eq userId.id }
+            val deleteUser = UserTable.deleteWhere { User.id eq userId }
         }
 
         if (deleteUser == 0) {

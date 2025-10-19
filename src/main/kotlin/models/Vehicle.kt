@@ -11,11 +11,11 @@ object VehicleTable: Table("Vehicle") {
     val seats: Column<Int> = integer("seats")
     val range: Column<Double> = double("range")
     val odometer: Column<Double> = double("odometer")
-    val licensePlate: Column<String> = varchar("license_plate", 20)
+    val licensePlate: Column<String> = varchar("licensePlate", 20)
     val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
     val location: Column<String> = varchar("location", 100)
-    val hourlyRate: Column<Double> = double("hourly_rate")
-    val customRate: Column<Int> = integer("custom_rate")
+    val hourlyRate: Column<Double> = double("hourlyRate")
+    val customRate: Column<Int> = integer("customRate")
 }
 
 data class Vehicle constructor(

@@ -57,10 +57,10 @@ abstract class VeihicleDao: VeihicleRepository {
         return vehicle?: throw Exception("Vehicle not found")
     }
     
-    override suspend fun create(entity: Vehicle): Vehicle {
+    override suspend fun create(entity: Vehicle) {
         var newVehicle: Vehicle? = null
         transaction {
-            val insertStatement = VehicleTable.insert {
+            newVehicle = VehicleTable.insert {
                 it[make] = entity.make
                 it[model] = entity.model
                 it[year] = entity.year
@@ -74,11 +74,11 @@ abstract class VeihicleDao: VeihicleRepository {
                 it[hourlyRate] = entity.hourlyRate
                 it[customRate] = entity.customRate
             }
-            val id = insertStatement[Vehicle.id]
-            newVehicle = entity.copy(id = id)
         }
-        
-        return newVehicle!!
+
+        if (newVehicle == null) {
+            throw Exception("Failed to create vehicle")
+        }
     }
     
     override suspend fun update(entity: Vehicle) {
