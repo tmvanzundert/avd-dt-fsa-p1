@@ -1,9 +1,10 @@
 package com.example.models
 
+import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 
 object VehicleTable: Table("Vehicle") {
-    val id: Column<Long> = long("id").autoIncrement().primaryKey()
+    val id: Column<Long> = long("id")/*.autoIncrement()*/
     val make: Column<String> = varchar("make", 50)
     val model: Column<String> = varchar("model", 50)
     val year: Column<Int> = integer("year")
@@ -16,6 +17,8 @@ object VehicleTable: Table("Vehicle") {
     val location: Column<String> = varchar("location", 100)
     val hourlyRate: Column<Double> = double("hourlyRate")
     val customRate: Column<Int> = integer("customRate")
+
+    override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
 data class Vehicle constructor(

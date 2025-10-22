@@ -1,6 +1,10 @@
 package com.example.models
 
 import java.io.File
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.core.statements.InsertStatement
 
 interface AuditLogRepository: CrudRepository<AuditLog, Long> {
     suspend fun export(filePath: String)
@@ -30,7 +34,7 @@ abstract class AuditLogDao: AuditLogRepository {
     override suspend fun findById(id: Long): AuditLog? {
         var auditLog: AuditLog? = null
         transaction {
-            val result = AuditLogTable.select { AuditLogTable.id eq id }.singleOrNull()
+            val result = AuditLogTable.select ( AuditLogTable.id eq id ).singleOrNull()
             if (result != null) {
                 auditLog = AuditLog(
                     id = result[AuditLogTable.id],
@@ -47,16 +51,16 @@ abstract class AuditLogDao: AuditLogRepository {
         return auditLog ?: throw Exception("AuditLog not found")
     }
 
-    override suspend fun create(entity: AuditLog) {
-        var newAuditLog: AuditLog? = null
+    override suspend fun create(item: AuditLog) {
+        var newAuditLog: InsertStatement<Number>? = null
         transaction {
             newAuditLog = AuditLogTable.insert {
-                it[entity] = entity.entity
-                it[entityId] = entity.entityId
-                it[action] = entity.action
-                it[payload] = entity.payload
-                it[createdAt] = entity.createdAt
-                it[createdBy] = entity.createdBy
+                it[entity] = item.entity
+                it[entityId] = item.entityId
+                it[action] = item.action
+                it[payload] = item.payload
+                it[createdAt] = item.createdAt
+                it[createdBy] = item.createdBy
             }
         }
 
@@ -65,24 +69,25 @@ abstract class AuditLogDao: AuditLogRepository {
         }
     }
 
-    override suspend fun update(entity: AuditLog) {
-        val auditLogId = findById(entity.id)?.id ?: throw Exception("AuditLog not found")
+    override suspend fun update(item: AuditLog) {
+        val auditLogId = findById(item.id)?.id ?: throw Exception("AuditLog not found")
         transaction {
             AuditLogTable.update({ AuditLogTable.id eq auditLogId }) {
-                it[entity] = entity.entity
-                it[entityId] = entity.entityId
-                it[action] = entity.action
-                it[payload] = entity.payload
-                it[createdAt] = entity.createdAt
-                it[createdBy] = entity.createdBy
+                it[entity] = item.entity
+                it[entityId] = item.entityId
+                it[action] = item.action
+                it[payload] = item.payload
+                it[createdAt] = item.createdAt
+                it[createdBy] = item.createdBy
             }
         }
     }
 
     override suspend fun delete(id: Long) {
         val auditLogId = findById(id)?.id ?: throw Exception("AuditLog not found")
+        var deleteAuditLog: Int = 0
         transaction {
-            val deleteAuditLog = AuditLogTable.deleteWhere { AuditLogTable.id eq auditLogId }
+            deleteAuditLog = AuditLogTable.deleteWhere { AuditLogTable.id eq auditLogId }
         }
 
         if (deleteAuditLog == 0) {
@@ -91,10 +96,8 @@ abstract class AuditLogDao: AuditLogRepository {
     }
 
     override suspend fun export(filePath: String) {
-        val auditLog = findAll()
-        if (auditLog.isEmpty()) {
+        val auditLog: AuditLog = findAll().firstOrNull() ?:
             throw Exception("No AuditLogs to export")
-        }
 
         val file = File(filePath)
         file.writeText("""

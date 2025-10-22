@@ -1,10 +1,15 @@
 package com.example.models
 
-interface VeihicleRepository: CrudRepository<Vehicle, Long> {
+import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.core.statements.InsertStatement
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+
+interface VehicleRepository: CrudRepository<Vehicle, Long> {
     suspend fun isAvailable(vehicleId: Long): Boolean
 }
 
-abstract class VeihicleDao: VeihicleRepository {
+abstract class VehicleDao: VehicleRepository {
     
     override suspend fun findAll(): List<Vehicle> {
         var vehicles: List<Vehicle> = emptyList()
@@ -34,7 +39,7 @@ abstract class VeihicleDao: VeihicleRepository {
     override suspend fun findById(id: Long): Vehicle? {
         var vehicle: Vehicle? = null
         transaction {
-            val result = VehicleTable.select { Vehicle.id eq id }.singleOrNull()
+            val result = VehicleTable.select ( VehicleTable.id eq id ).singleOrNull()
             if (result != null) {
                 vehicle = Vehicle(
                     id = result[VehicleTable.id],
@@ -58,7 +63,7 @@ abstract class VeihicleDao: VeihicleRepository {
     }
     
     override suspend fun create(entity: Vehicle) {
-        var newVehicle: Vehicle? = null
+        var newVehicle: InsertStatement<Number>? = null
         transaction {
             newVehicle = VehicleTable.insert {
                 it[make] = entity.make
@@ -85,7 +90,7 @@ abstract class VeihicleDao: VeihicleRepository {
         val vehicleId = findById(entity.id)?.id ?: throw Exception("Vehicle not found")
         
         transaction {
-            VehicleTable.update({ Vehicle.id eq vehicleId.id }) {
+            VehicleTable.update({ VehicleTable.id eq vehicleId }) {
                 it[make] = entity.make
                 it[model] = entity.model
                 it[year] = entity.year
@@ -107,7 +112,7 @@ abstract class VeihicleDao: VeihicleRepository {
 
         var rowsDeleted = 0
         transaction {
-            rowsDeleted = Vehicle.deleteWhere { Vehicle.id eq vehicleId.id }
+            rowsDeleted = VehicleTable.deleteWhere { VehicleTable.id eq vehicleId.id }
         }
         
         if (rowsDeleted == 0) {
