@@ -18,14 +18,20 @@ fun Application.module() {
     configureDatabase()
     val user: User = User(
         id = 1L,
-        name = "John Doe",
+        name = "John Cina",
         role = Role.USER,
         phone = "123-456-7890",
         password = "password123",
         email = "",
         driverLicenseNumber = "D1234567"
     )
-    UserDao().create(user)
+    /*UserDao().create(user)
+    UserDao().delete(1)*/
+    /*val user1 = UserDao().findById(1)
+    println(user1?.name)*/
+    /*UserDao().findAll().forEach {
+        println(it.name)
+    }*/
 }
 
 fun configureDatabase() {

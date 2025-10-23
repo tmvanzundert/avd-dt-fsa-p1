@@ -9,7 +9,7 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.datetime.datetime
 
 object UserTable: Table("User") {
-    val id: Column<Long> = long("id")/*.autoIncrement()*/
+    val id: Column<Long> = long("id").autoIncrement()
     val name: Column<String> = varchar("name", 255)
     val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.USER)
     val phone: Column<String> = varchar("phone", 20)
