@@ -27,24 +27,15 @@ class LocationDao: LocationRepository {
     }
 
     override fun findById(id: String): Location? {
-        var location: Location? = null
-        transaction {
-            val result = LocationTable.select ( LocationTable.id eq id ).singleOrNull()
-            if (result != null) {
-                location = Location(
-                    id = result[LocationTable.id],
-                    name = result[LocationTable.name],
-                    address = result[LocationTable.address]
-                )
-            }
-        }
-
-        return location ?: throw Exception("Location not found")
+        val users = findAll()
+        return users.find { it.id == id }
     }
 
     override fun create(item: Location) {
-        // Throw error if id already exists in the database
-        findById(item.id) ?: throw Exception("Location already exists")
+        // Check if user already exists
+        findById(item.id)?.id ?.let {
+            throw Exception("User ${item.name} already exists")
+        }
 
         transaction {
             LocationTable.insert {

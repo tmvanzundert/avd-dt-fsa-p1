@@ -23,12 +23,12 @@ class VehicleDao: VehicleRepository {
                     category = it[VehicleTable.category],
                     seats = it[VehicleTable.seats],
                     range = it[VehicleTable.range],
-                    odometer = it[VehicleTable.odometer],
+                    beginOdometer = it[VehicleTable.beginOdometer],
+                    endOdometer = it[VehicleTable.endOdometer],
                     licensePlate = it[VehicleTable.licensePlate],
                     status = it[VehicleTable.status],
                     location = it[VehicleTable.location],
-                    hourlyRate = it[VehicleTable.hourlyRate],
-                    customRate = it[VehicleTable.customRate]
+                    kilometerRate = it[VehicleTable.kilometerRate]
                 )
             }
         }
@@ -37,72 +37,52 @@ class VehicleDao: VehicleRepository {
     }
     
     override fun findById(id: Long): Vehicle? {
-        var vehicle: Vehicle? = null
-        transaction {
-            val result = VehicleTable.select ( VehicleTable.id eq id ).singleOrNull()
-            if (result != null) {
-                vehicle = Vehicle(
-                    id = result[VehicleTable.id],
-                    make = result[VehicleTable.make],
-                    model = result[VehicleTable.model],
-                    year = result[VehicleTable.year],
-                    category = result[VehicleTable.category],
-                    seats = result[VehicleTable.seats],
-                    range = result[VehicleTable.range],
-                    odometer = result[VehicleTable.odometer],
-                    licensePlate = result[VehicleTable.licensePlate],
-                    status = result[VehicleTable.status],
-                    location = result[VehicleTable.location],
-                    hourlyRate = result[VehicleTable.hourlyRate],
-                    customRate = result[VehicleTable.customRate]
-                )
-            }
-        }
-        
-        return vehicle?: throw Exception("Vehicle not found")
+        val users = findAll()
+        return users.find { it.id == id }
     }
     
-    override fun create(entity: Vehicle) {
-        var newVehicle: InsertStatement<Number>? = null
-        transaction {
-            newVehicle = VehicleTable.insert {
-                it[make] = entity.make
-                it[model] = entity.model
-                it[year] = entity.year
-                it[category] = entity.category
-                it[seats] = entity.seats
-                it[range] = entity.range
-                it[odometer] = entity.odometer
-                it[licensePlate] = entity.licensePlate
-                it[status] = entity.status
-                it[location] = entity.location
-                it[hourlyRate] = entity.hourlyRate
-                it[customRate] = entity.customRate
-            }
+    override fun create(item: Vehicle) {
+        // Check if user already exists
+        findById(item.id)?.id ?.let {
+            throw Exception("User ${item.make} already exists")
         }
 
-        if (newVehicle == null) {
-            throw Exception("Failed to create vehicle")
+        transaction {
+            VehicleTable.insert {
+                it[id] = item.id
+                it[make] = item.make
+                it[model] = item.model
+                it[year] = item.year
+                it[category] = item.category
+                it[seats] = item.seats
+                it[range] = item.range
+                it[beginOdometer] = item.beginOdometer
+                it[endOdometer] = item.endOdometer
+                it[licensePlate] = item.licensePlate
+                it[status] = item.status
+                it[location] = item.location
+                it[kilometerRate] = item.kilometerRate
+            }
         }
     }
     
-    override fun update(entity: Vehicle) {
-        val vehicleId = findById(entity.id)?.id ?: throw Exception("Vehicle not found")
+    override fun update(item: Vehicle) {
+        val vehicleId = findById(item.id)?.id ?: throw Exception("Vehicle not found")
         
         transaction {
             VehicleTable.update({ VehicleTable.id eq vehicleId }) {
-                it[make] = entity.make
-                it[model] = entity.model
-                it[year] = entity.year
-                it[category] = entity.category
-                it[seats] = entity.seats
-                it[range] = entity.range
-                it[odometer] = entity.odometer
-                it[licensePlate] = entity.licensePlate
-                it[status] = entity.status
-                it[location] = entity.location
-                it[hourlyRate] = entity.hourlyRate
-                it[customRate] = entity.customRate
+                it[make] = item.make
+                it[model] = item.model
+                it[year] = item.year
+                it[category] = item.category
+                it[seats] = item.seats
+                it[range] = item.range
+                it[beginOdometer] = VehicleTable.beginOdometer
+                it[endOdometer] = VehicleTable.endOdometer
+                it[licensePlate] = item.licensePlate
+                it[status] = item.status
+                it[location] = item.location
+                it[kilometerRate] = item.kilometerRate
             }
         }
     }

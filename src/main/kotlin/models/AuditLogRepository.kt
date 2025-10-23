@@ -32,29 +32,18 @@ class AuditLogDao: AuditLogRepository {
     }
 
     override fun findById(id: Long): AuditLog? {
-        var auditLog: AuditLog? = null
-        transaction {
-            val result = AuditLogTable.select ( AuditLogTable.id eq id ).singleOrNull()
-            if (result != null) {
-                auditLog = AuditLog(
-                    id = result[AuditLogTable.id],
-                    entity = result[AuditLogTable.entity],
-                    entityId = result[AuditLogTable.entityId],
-                    action = result[AuditLogTable.action],
-                    payload = result[AuditLogTable.payload],
-                    createdAt = result[AuditLogTable.createdAt],
-                    createdBy = result[AuditLogTable.createdBy]
-                )
-            }
-        }
-
-        return auditLog ?: throw Exception("AuditLog not found")
+        val users = findAll()
+        return users.find { it.id == id }
     }
 
     override fun create(item: AuditLog) {
-        var newAuditLog: InsertStatement<Number>? = null
+        // Check if user already exists
+        findById(item.id)?.id ?.let {
+            throw Exception("User ${item.entity} already exists")
+        }
+
         transaction {
-            newAuditLog = AuditLogTable.insert {
+            AuditLogTable.insert {
                 it[entity] = item.entity
                 it[entityId] = item.entityId
                 it[action] = item.action
@@ -62,10 +51,6 @@ class AuditLogDao: AuditLogRepository {
                 it[createdAt] = item.createdAt
                 it[createdBy] = item.createdBy
             }
-        }
-
-        if (newAuditLog == null) {
-            throw Exception("Failed to create AuditLog")
         }
     }
 
