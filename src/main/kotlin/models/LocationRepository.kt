@@ -11,7 +11,7 @@ interface LocationRepository: CrudRepository<Location, String> {
 
 class LocationDao: LocationRepository {
 
-    override suspend fun findAll(): List<Location> {
+    override fun findAll(): List<Location> {
         var locations = listOf<Location>()
         transaction {
             locations = LocationTable.selectAll().map {
@@ -26,7 +26,7 @@ class LocationDao: LocationRepository {
         return locations
     }
 
-    override suspend fun findById(id: String): Location? {
+    override fun findById(id: String): Location? {
         var location: Location? = null
         transaction {
             val result = LocationTable.select ( LocationTable.id eq id ).singleOrNull()
@@ -42,7 +42,7 @@ class LocationDao: LocationRepository {
         return location ?: throw Exception("Location not found")
     }
 
-    override suspend fun create(item: Location) {
+    override fun create(item: Location) {
         // Throw error if id already exists in the database
         findById(item.id) ?: throw Exception("Location already exists")
 
@@ -55,7 +55,7 @@ class LocationDao: LocationRepository {
         }
     }
 
-    override suspend fun update(item: Location) {
+    override fun update(item: Location) {
         // Throw error if id does not exist in the database
         findById(item.id) ?: throw Exception("Location not found")
 
@@ -67,7 +67,7 @@ class LocationDao: LocationRepository {
         }
     }
 
-    override suspend fun delete(id: String) {
+    override fun delete(id: String) {
         // Throw error if id does not exist in the database
         findById(id) ?: throw Exception("Location not found")
 

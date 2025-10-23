@@ -1,5 +1,6 @@
 package com.example
 
+import com.example.models.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -11,11 +12,20 @@ fun main() {
 }
 
 fun Application.module() {
-    configureDatabase()
-
     configureSerialization()
     configureRouting()
     configureStatusPages()
+    configureDatabase()
+    val user: User = User(
+        id = 1L,
+        name = "John Doe",
+        role = Role.USER,
+        phone = "123-456-7890",
+        password = "password123",
+        email = "",
+        driverLicenseNumber = "D1234567"
+    )
+    UserDao().create(user)
 }
 
 fun configureDatabase() {

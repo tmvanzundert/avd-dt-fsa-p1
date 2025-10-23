@@ -13,7 +13,7 @@ private interface UserRepository<User, Long>: CrudRepository<User, Long> {
 }
 
 @OptIn(ExperimentalTime::class)
-abstract class UserDao: UserRepository<User, Long> {
+class UserDao: UserRepository<User, Long> {
 
     // Delete?
     /*private var dbConnection: Database = null
@@ -22,7 +22,7 @@ abstract class UserDao: UserRepository<User, Long> {
         dbConnection = dbConnect()
     }*/
 
-    override suspend fun findAll(): List<User> {
+    override fun findAll(): List<User> {
         // Delete?
         /*val users = dbConnection.query("SELECT * FROM users")
         return users.map { row ->
@@ -61,7 +61,7 @@ abstract class UserDao: UserRepository<User, Long> {
         return users
     }
 
-    override suspend fun findById(id: Long): User? {
+    override fun findById(id: Long): User? {
         var user: User? = null
         transaction{
             user = UserTable.select ( UserTable.id eq id ).map {
@@ -83,7 +83,7 @@ abstract class UserDao: UserRepository<User, Long> {
         return user
     }
 
-    override suspend fun create(entity: User) {
+    override fun create(entity: User) {
         var newUser: InsertStatement<Number>? = null
         transaction {
             newUser = UserTable.insert {
@@ -105,7 +105,7 @@ abstract class UserDao: UserRepository<User, Long> {
         }
     }
 
-    override suspend fun update(entity: User) {
+    override fun update(entity: User) {
         val userId = findById(entity.id)?.id ?: throw Exception("User not found")
 
         transaction {
@@ -123,7 +123,7 @@ abstract class UserDao: UserRepository<User, Long> {
         }
     }
 
-    override suspend fun delete(id: Long) {
+    override fun delete(id: Long) {
         val userId = findById(id)?.id ?: throw Exception("User not found")
 
         var deleteUser = 0

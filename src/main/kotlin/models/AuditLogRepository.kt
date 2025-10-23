@@ -7,12 +7,12 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.InsertStatement
 
 interface AuditLogRepository: CrudRepository<AuditLog, Long> {
-    suspend fun export(filePath: String)
+    fun export(filePath: String)
 }
 
-abstract class AuditLogDao: AuditLogRepository {
+class AuditLogDao: AuditLogRepository {
 
-    override suspend fun findAll(): List<AuditLog> {
+    override fun findAll(): List<AuditLog> {
         var auditLogs = emptyList<AuditLog>()
         transaction {
             auditLogs = AuditLogTable.selectAll().map {
@@ -31,7 +31,7 @@ abstract class AuditLogDao: AuditLogRepository {
         return auditLogs
     }
 
-    override suspend fun findById(id: Long): AuditLog? {
+    override fun findById(id: Long): AuditLog? {
         var auditLog: AuditLog? = null
         transaction {
             val result = AuditLogTable.select ( AuditLogTable.id eq id ).singleOrNull()
@@ -51,7 +51,7 @@ abstract class AuditLogDao: AuditLogRepository {
         return auditLog ?: throw Exception("AuditLog not found")
     }
 
-    override suspend fun create(item: AuditLog) {
+    override fun create(item: AuditLog) {
         var newAuditLog: InsertStatement<Number>? = null
         transaction {
             newAuditLog = AuditLogTable.insert {
@@ -69,7 +69,7 @@ abstract class AuditLogDao: AuditLogRepository {
         }
     }
 
-    override suspend fun update(item: AuditLog) {
+    override fun update(item: AuditLog) {
         val auditLogId = findById(item.id)?.id ?: throw Exception("AuditLog not found")
         transaction {
             AuditLogTable.update({ AuditLogTable.id eq auditLogId }) {
@@ -83,7 +83,7 @@ abstract class AuditLogDao: AuditLogRepository {
         }
     }
 
-    override suspend fun delete(id: Long) {
+    override fun delete(id: Long) {
         val auditLogId = findById(id)?.id ?: throw Exception("AuditLog not found")
         var deleteAuditLog: Int = 0
         transaction {
@@ -95,7 +95,7 @@ abstract class AuditLogDao: AuditLogRepository {
         }
     }
 
-    override suspend fun export(filePath: String) {
+    override fun export(filePath: String) {
         val auditLog: AuditLog = findAll().firstOrNull() ?:
             throw Exception("No AuditLogs to export")
 

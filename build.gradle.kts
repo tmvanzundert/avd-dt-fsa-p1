@@ -28,7 +28,6 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
-    implementation("com.h2database:h2:2.3.232")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")

@@ -6,12 +6,12 @@ import org.jetbrains.exposed.v1.core.statements.InsertStatement
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 interface VehicleRepository: CrudRepository<Vehicle, Long> {
-    suspend fun isAvailable(vehicleId: Long): Boolean
+    fun isAvailable(vehicleId: Long): Boolean
 }
 
-abstract class VehicleDao: VehicleRepository {
+class VehicleDao: VehicleRepository {
     
-    override suspend fun findAll(): List<Vehicle> {
+    override fun findAll(): List<Vehicle> {
         var vehicles: List<Vehicle> = emptyList()
         transaction {
             vehicles = VehicleTable.selectAll().map {
@@ -36,7 +36,7 @@ abstract class VehicleDao: VehicleRepository {
         return vehicles
     }
     
-    override suspend fun findById(id: Long): Vehicle? {
+    override fun findById(id: Long): Vehicle? {
         var vehicle: Vehicle? = null
         transaction {
             val result = VehicleTable.select ( VehicleTable.id eq id ).singleOrNull()
@@ -62,7 +62,7 @@ abstract class VehicleDao: VehicleRepository {
         return vehicle?: throw Exception("Vehicle not found")
     }
     
-    override suspend fun create(entity: Vehicle) {
+    override fun create(entity: Vehicle) {
         var newVehicle: InsertStatement<Number>? = null
         transaction {
             newVehicle = VehicleTable.insert {
@@ -86,7 +86,7 @@ abstract class VehicleDao: VehicleRepository {
         }
     }
     
-    override suspend fun update(entity: Vehicle) {
+    override fun update(entity: Vehicle) {
         val vehicleId = findById(entity.id)?.id ?: throw Exception("Vehicle not found")
         
         transaction {
@@ -107,7 +107,7 @@ abstract class VehicleDao: VehicleRepository {
         }
     }
     
-    override suspend fun delete(id: Long) {
+    override fun delete(id: Long) {
         val vehicleId = findById(id) ?: throw Exception("Vehicle not found")
 
         var rowsDeleted = 0
@@ -120,7 +120,7 @@ abstract class VehicleDao: VehicleRepository {
         }
     }
     
-    override suspend fun isAvailable(vehicleId: Long): Boolean {
+    override fun isAvailable(vehicleId: Long): Boolean {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
         return vehicle.status == VehicleStatus.AVAILABLE
     }
