@@ -34,3 +34,8 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Database implementation ###
+./build.gradle.kts
+./src/main/resources/application.yaml
+./src/main/kotlin/DatabaseFactory.kt
