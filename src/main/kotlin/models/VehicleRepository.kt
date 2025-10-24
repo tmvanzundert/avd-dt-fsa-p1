@@ -28,7 +28,8 @@ class VehicleDao: VehicleRepository {
                     licensePlate = it[VehicleTable.licensePlate],
                     status = it[VehicleTable.status],
                     location = it[VehicleTable.location],
-                    kilometerRate = it[VehicleTable.kilometerRate]
+                    kilometerRate = it[VehicleTable.kilometerRate],
+                    photoPath = it[VehicleTable.photoPath]
                 )
             }
         }
@@ -62,6 +63,7 @@ class VehicleDao: VehicleRepository {
                 it[status] = item.status
                 it[location] = item.location
                 it[kilometerRate] = item.kilometerRate
+                it[photoPath] = item.photoPath
             }
         }
     }
@@ -83,6 +85,7 @@ class VehicleDao: VehicleRepository {
                 it[status] = item.status
                 it[location] = item.location
                 it[kilometerRate] = item.kilometerRate
+                it[photoPath] = item.photoPath
             }
         }
     }

@@ -17,6 +17,7 @@ object VehicleTable: Table("Vehicle") {
     val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
     val location: Column<String> = varchar("location", 100)
     val kilometerRate: Column<Double> = double("kilometerRate")
+    val photoPath: Column<String> = text("photoPath").clientDefault { "[]" }
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -34,7 +35,8 @@ data class Vehicle constructor(
     val licensePlate: String,
     val status: VehicleStatus = VehicleStatus.AVAILABLE,
     val location: String,
-    val kilometerRate: Double
+    val kilometerRate: Double,
+    val photoPath: String = "[]"
 )
 
 enum class VehicleStatus {
