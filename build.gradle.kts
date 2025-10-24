@@ -25,4 +25,5 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages:3.3.0")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("io.ktor:ktor-server-test-host-jvm:3.3.0")
 }
