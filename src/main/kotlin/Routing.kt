@@ -20,15 +20,21 @@ fun Application.configureRouting() {
         }
 
         post("/upload/cars/{carId}") {
-            // todo() check for integer carId parameter
+            // Extract carId from the URL parameters and throw error if missing
             val carId = call.parameters["carId"] ?: return@post call.respondText(
                 "Missing carId",
                 status = io.ktor.http.HttpStatusCode.BadRequest
             )
 
-            var fileDescription = ""
-            val originalFileNames = mutableListOf<String>()
-            val savedFileNames = mutableListOf<String>()
+            // Check if car exists
+            if (VehicleDao.findById(carId) == null) {
+                return@post call.respondText(
+                    "Car with id='$carId' not found",
+                    status = io.ktor.http.HttpStatusCode.NotFound
+                )
+            }
+
+            // Set the path for the upload folder
             val uploadDir = File("uploads/cars/$carId/").apply { mkdirs() }
 
             // Clean the car-specific directory before saving the new pictures
@@ -48,14 +54,20 @@ fun Application.configureRouting() {
                 )
             }
 
-            val multipartData = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 100)
+            var fileDescription = ""
+            val originalFileNames = mutableListOf<String>()
+            val savedFileNames = mutableListOf<String>()
 
+            // When an HTTP POST is made to this route, figure out if it's file or form data
+            val multipartData = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 100)
             multipartData.forEachPart { part ->
                 when (part) {
+                    // Save the form data as description
                     is PartData.FormItem -> {
                         fileDescription = part.value
                     }
 
+                    // Save the file parts to disk with sequential naming
                     is PartData.FileItem -> {
                         if (savedFileNames.size < 4) {
                             val originalName = part.originalFileName ?: "upload-${System.currentTimeMillis()}"
@@ -77,6 +89,7 @@ fun Application.configureRouting() {
                 part.dispose()
             }
 
+            // Check if any files were uploaded
             if (savedFileNames.isEmpty()) {
                 return@post call.respondText(
                     "No image files were uploaded",
@@ -93,6 +106,8 @@ fun Application.configureRouting() {
             // Multi-file response (show saved names)
             val joinedSaved = savedFileNames.joinToString(", ")
             call.respondText("Uploaded ${savedFileNames.size} file(s): ${joinedSaved} to 'uploads/cars/${carId}/'")
+
+            // toDo() input paths in the database
         }
     }
 }

@@ -1,4 +1,4 @@
-POST http://localhost:8080/upload/cars/1
+POST http://localhost:8085/upload/cars/1
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 
 --WebAppBoundary
@@ -7,23 +7,32 @@ Content-Type: text/plain
 
 Four images test
 --WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="photo1.jpg"
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
 Content-Type: image/jpg
 
 < ./ktor.jpg
 --WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="photo2.jpg"
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
 Content-Type: image/jpg
 
 < ./ktor.jpg
 --WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="photo3.jpg"
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
 Content-Type: image/jpg
 
 < ./ktor.jpg
 --WebAppBoundary
-Content-Disposition: form-data; name="image"; filename="photo4.jpg"
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
 Content-Type: image/jpg
 
 < ./ktor.jpg
---WebAppBoundary--
+--WebAppBoundary
