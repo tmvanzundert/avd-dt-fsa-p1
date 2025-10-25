@@ -29,7 +29,9 @@ class VehicleDao: VehicleRepository {
                     status = it[VehicleTable.status],
                     location = it[VehicleTable.location],
                     kilometerRate = it[VehicleTable.kilometerRate],
-                    photoPath = it[VehicleTable.photoPath]
+                    photoPath = it[VehicleTable.photoPath],
+                    beginReservation = it[VehicleTable.beginReservation],
+                    endReservation = it[VehicleTable.endReservation]
                 )
             }
         }
@@ -64,6 +66,8 @@ class VehicleDao: VehicleRepository {
                 it[location] = item.location
                 it[kilometerRate] = item.kilometerRate
                 it[photoPath] = item.photoPath
+                it[beginReservation] = item.beginReservation
+                it[endReservation] = item.endReservation
             }
         }
     }
@@ -86,6 +90,8 @@ class VehicleDao: VehicleRepository {
                 it[location] = item.location.ifEmpty { vehicleId.location }
                 it[kilometerRate] = if (item.kilometerRate == 0.0) vehicleId.kilometerRate else item.kilometerRate
                 it[photoPath] = item.photoPath.ifEmpty { vehicleId.photoPath }
+                it[beginReservation] = item.beginReservation
+                it[endReservation] = item.endReservation
             }
         }
     }
