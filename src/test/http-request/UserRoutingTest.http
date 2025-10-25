@@ -1,0 +1,36 @@
+### Get all users
+GET http://localhost:8080/users
+
+### Get user by ID
+GET http://localhost:8080/users/1
+
+### Create user
+POST http://localhost:8080/users
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "John Cina",
+  "role": "USER",
+  "phone": "123-456-7890",
+  "password": "password123",
+  "email": "john@example.com",
+  "driverLicenseNumber": "D1234567"
+}
+
+### Update user
+PUT http://localhost:8080/users/1
+Content-Type: application/json
+
+{
+  "id": 1,
+  "name": "Jane Doe",
+  "role": "USER",
+  "phone": "123-456-7890",
+  "password": "password123",
+  "email": "john@example.com",
+  "driverLicenseNumber": "D1234567"
+}
+
+### Delete user
+DELETE http://localhost:8080/users/1

@@ -5,6 +5,9 @@ import io.ktor.http.content.forEachPart
 import io.ktor.server.application.*
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.*
+import com.example.models.*
+import com.example.routes.*
+import io.ktor.server.application.Application
 import io.ktor.server.routing.*
 import io.ktor.utils.io.copyAndClose
 import java.io.File
@@ -13,12 +16,10 @@ import io.ktor.util.cio.writeChannel
 import kotlinx.serialization.json.*
 
 fun Application.configureRouting() {
+    val userDao = UserDao()
+    val vehicleDao = VehicleDao()
+
     routing {
-        // HTTP GET route for the root path ("/"), responds with "Hello World!" for now.
-        // TODO: Replace with actual content later, usage and route endpoints.
-        get("/") {
-            call.respondText("Hello World!")
-        }
 
         post("/upload/cars/{carId}") {
             // Extract carId from the URL parameters and throw error if missing
@@ -133,5 +134,7 @@ fun Application.configureRouting() {
             call.respondText("Uploaded ${savedFileNames.size} file(s): ${joinedSaved} to 'uploads/cars/${carId}/'")
 
         }
+        userRoutes(userDao)
+        vehicleRoutes(vehicleDao)
     }
 }
