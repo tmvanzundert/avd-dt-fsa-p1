@@ -1,12 +1,21 @@
 package com.example
 
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
-import io.ktor.server.testing.*
-import kotlin.test.*
+import io.ktor.client.request.forms.MultiPartFormDataContent
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.testing.testApplication
 import java.io.File
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class MultiUploadFileTest {
     val boundary = "WebAppBoundary"
@@ -25,6 +34,7 @@ class MultiUploadFileTest {
             configureSerialization()
             configureRouting()
             configureStatusPages()
+            configureDatabase()
         }
 
         val response = client.post("/upload/cars/1") {
@@ -37,7 +47,7 @@ class MultiUploadFileTest {
                             append(
                                 "image",
                                 imageBytes,
-                                Headers.build {
+                                Headers.Companion.build {
                                     append(HttpHeaders.ContentType, "image/$extension")
                                     append(HttpHeaders.ContentDisposition, "filename=\"$name\"")
                                 }
@@ -72,6 +82,7 @@ class MultiUploadFileTest {
             configureSerialization()
             configureRouting()
             configureStatusPages()
+            configureDatabase()
         }
 
         val response = client.post("/upload/cars/1") {
@@ -82,7 +93,7 @@ class MultiUploadFileTest {
                         append(
                             "image",
                             imageBytes,
-                            Headers.build {
+                            Headers.Companion.build {
                                 append(HttpHeaders.ContentType, "image/$extension")
                                 append(HttpHeaders.ContentDisposition, "filename=\"ktor.$extension\"")
                             }
@@ -94,7 +105,10 @@ class MultiUploadFileTest {
             )
         }
 
-        assertEquals("Ktor logo is uploaded to 'uploads/cars/1/picture_1.$extension'", response.bodyAsText(Charsets.UTF_8))
+        assertEquals(
+            "Ktor logo is uploaded to 'uploads/cars/1/picture_1.$extension'",
+            response.bodyAsText(Charsets.UTF_8)
+        )
 
         // File should be saved with sequential name in per-car directory
         val saved = File("uploads/cars/1/picture_1.$extension")
@@ -104,6 +118,12 @@ class MultiUploadFileTest {
 
     @Test
     fun testUploadNoImages() = testApplication {
+        application {
+            configureSerialization()
+            configureRouting()
+            configureStatusPages()
+            configureDatabase()
+        }
         val response = client.post("/upload/cars/1") {
             setBody(
                 MultiPartFormDataContent(
@@ -115,13 +135,18 @@ class MultiUploadFileTest {
                 )
             )
         }
-
-        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(HttpStatusCode.Companion.BadRequest, response.status)
         assertEquals("400: Bad Request", response.bodyAsText(Charsets.UTF_8))
     }
 
     @Test
     fun testCleanupCarDirectoryBeforeUpload() = testApplication {
+        application {
+            configureSerialization()
+            configureRouting()
+            configureStatusPages()
+            configureDatabase()
+        }
         val carId = "1"
         val carDir = File("uploads/cars/$carId").apply { mkdirs() }
         val oldFile = File(carDir, "old_to_be_deleted.txt").apply { writeText("old") }
@@ -137,7 +162,7 @@ class MultiUploadFileTest {
                         append(
                             "image",
                             imageBytes,
-                            Headers.build {
+                            Headers.Companion.build {
                                 append(HttpHeaders.ContentType, "image/$extension")
                                 append(HttpHeaders.ContentDisposition, "filename=\"ktor_logo.$extension\"")
                             }
@@ -149,7 +174,10 @@ class MultiUploadFileTest {
             )
         }
 
-        assertEquals("Cleanup test is uploaded to 'uploads/cars/1/picture_1.$extension'", response.bodyAsText(Charsets.UTF_8))
+        assertEquals(
+            "Cleanup test is uploaded to 'uploads/cars/1/picture_1.$extension'",
+            response.bodyAsText(Charsets.UTF_8)
+        )
 
         // Old file must be removed by cleanup
         assertFalse(oldFile.exists(), "Expected cleanup to remove old file: ${oldFile.path}")
