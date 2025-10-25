@@ -28,8 +28,10 @@ fun Application.configureRouting() {
                 status = io.ktor.http.HttpStatusCode.BadRequest
             )
 
+            val id = carId.toLong()
+
             // Check if car exists
-            if (VehicleDao.findById(carId) == null) {
+            if (vehicleDao.findById(id) == null) {
                 return@post call.respondText(
                     "Car with id='$carId' not found",
                     status = io.ktor.http.HttpStatusCode.NotFound
@@ -104,7 +106,7 @@ fun Application.configureRouting() {
             // Serialize to JSON string and set as information that needs to be updated in the vehicle object
             val json: String = Json.encodeToJsonElement(savedFilePaths).toString()
             val vehicle: Vehicle = Vehicle(
-                id = carId,
+                id = id,
                 make = "",
                 model = "",
                 year = 0,
@@ -117,21 +119,23 @@ fun Application.configureRouting() {
                 status = VehicleStatus.NULL,
                 location = "",
                 kilometerRate = 0.0,
-                photoPath = json
+                photoPath = json,
+                beginReservation = null,
+                endReservation = null
             )
 
             // Update vehicle with new photo paths
-            VehicleDao.update(vehicle)
+            vehicleDao.update(vehicle)
 
             // Single-file response
             if (savedFileNames.size == 1) {
                 // Return the actual saved filename with the picture_ index and per-car directory
-                return@post call.respondText("${fileDescription} is uploaded to 'uploads/cars/${carId}/${savedFileNames.first()}'")
+                return@post call.respondText("$fileDescription is uploaded to 'uploads/cars/${carId}/${savedFileNames.first()}'")
             }
 
             // Multi-file response (show saved names)
             val joinedSaved = savedFileNames.joinToString(", ")
-            call.respondText("Uploaded ${savedFileNames.size} file(s): ${joinedSaved} to 'uploads/cars/${carId}/'")
+            call.respondText("Uploaded ${savedFileNames.size} file(s): $joinedSaved to 'uploads/cars/${carId}/'")
 
         }
         userRoutes(userDao)

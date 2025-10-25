@@ -22,7 +22,9 @@ class VehicleRepositoryTest {
         status = VehicleStatus.AVAILABLE,
         location = "Garage",
         kilometerRate = 0.5,
-        photoPath = "[]"
+        photoPath = "[]",
+        beginReservation = null,
+        endReservation = null
     )
 
     @BeforeTest
