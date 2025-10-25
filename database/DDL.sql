@@ -45,10 +45,11 @@ CREATE TABLE
             "NULL"
         ) DEFAULT 'NULL',
         `location` VARCHAR(100),
-        `kilometerRate` DOUBLE,
+        `price` DOUBLE,
         `photoPath` TEXT,
         `beginReservation` DATETIME,
         `endReservation` DATETIME,
+        `totalYearlyUsageKilometers` DOUBLE,
 
         -- Foreign Key to User table
         `ownerId` BIGINT,
