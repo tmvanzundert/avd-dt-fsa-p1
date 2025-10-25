@@ -21,10 +21,11 @@ class VehicleRepositoryTest {
         licensePlate = "ABC-123",
         status = VehicleStatus.AVAILABLE,
         location = "Garage",
-        kilometerRate = 0.5,
+        price = 0.5,
         photoPath = "[]",
         beginReservation = null,
-        endReservation = null
+        endReservation = null,
+        totalYearlyUsageKilometers = 0.0
     )
 
     @BeforeTest
