@@ -22,7 +22,7 @@ CREATE TABLE
         `rating` FLOAT,
         `createdAt` DATETIME,
         `birthDate` DATETIME,
-        `driverLicenseNumber` VARCHAR(50) NOT NULL,
+        `driverLicenseNumber` VARCHAR(50) NOT NULL
     );
 
 
@@ -41,14 +41,16 @@ CREATE TABLE
         `status` ENUM (
             "AVAILABLE",
             "RENTED",
-            "MAINTENANCE"
+            "MAINTENANCE",
             "NULL"
-        ) DEFAULT "NULL"
+        ) DEFAULT 'NULL',
         `location` VARCHAR(100),
         `kilometerRate` DOUBLE,
         `photoPath` TEXT,
         `beginReservation` DATETIME,
         `endReservation` DATETIME,
 
-        ADD FOREIGN KEY (`ownerId`) REFERENCES `User`(`id`) ON DELETE CASCADE
+        -- Foreign Key to User table
+        `ownerId` BIGINT,
+        FOREIGN KEY (`ownerId`) REFERENCES `User`(`id`) ON DELETE CASCADE
     );
