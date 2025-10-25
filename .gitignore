@@ -31,4 +31,8 @@ out/
 ### VS Code ###
 .vscode/
 
+### Database implementation ###
+./build.gradle.kts
+./src/main/resources/application.yaml
+./src/main/kotlin/DatabaseFactory.kt
 /uploads/cars/1/old_to_be_deleted.txt
