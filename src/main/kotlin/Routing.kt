@@ -10,6 +10,7 @@ import io.ktor.utils.io.copyAndClose
 import java.io.File
 import java.io.IOException
 import io.ktor.util.cio.writeChannel
+import kotlinx.serialization.json.*
 
 fun Application.configureRouting() {
     routing {
@@ -57,6 +58,7 @@ fun Application.configureRouting() {
             var fileDescription = ""
             val originalFileNames = mutableListOf<String>()
             val savedFileNames = mutableListOf<String>()
+            val savedFilePaths = mutableListOf<String>()
 
             // When an HTTP POST is made to this route, figure out if it's file or form data
             val multipartData = call.receiveMultipart(formFieldLimit = 1024 * 1024 * 100)
@@ -80,6 +82,7 @@ fun Application.configureRouting() {
                             part.provider().copyAndClose(file.writeChannel())
                             originalFileNames.add(originalName)
                             savedFileNames.add(savedName)
+                            savedFilePaths.add("$uploadDir/$savedName")
                         }
                     }
 
@@ -96,6 +99,28 @@ fun Application.configureRouting() {
                     status = io.ktor.http.HttpStatusCode.BadRequest
                 )
             }
+
+            // Serialize to JSON string and set as information that needs to be updated in the vehicle object
+            val json: String = Json.encodeToJsonElement(savedFilePaths).toString()
+            val vehicle: Vehicle = Vehicle(
+                id = carId,
+                make = "",
+                model = "",
+                year = 0,
+                category = "",
+                seats = 0,
+                range = 0.0,
+                beginOdometer = 0.0,
+                endOdometer = 0.0,
+                licensePlate = "",
+                status = VehicleStatus.NULL,
+                location = "",
+                kilometerRate = 0.0,
+                photoPath = json
+            )
+
+            // Update vehicle with new photo paths
+            VehicleDao.update(vehicle)
 
             // Single-file response
             if (savedFileNames.size == 1) {
