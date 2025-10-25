@@ -117,10 +117,11 @@ fun Route.imageRoutes() {
             licensePlate = "",
             status = VehicleStatus.NULL,
             location = "",
-            kilometerRate = 0.0,
+            price = 0.0,
             photoPath = json,
             beginReservation = null,
-            endReservation = null
+            endReservation = null,
+            totalYearlyUsageKilometers = 0.0
         )
 
         // Update vehicle with new photo paths
