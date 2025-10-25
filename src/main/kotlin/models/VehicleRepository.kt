@@ -29,7 +29,9 @@ class VehicleDao: VehicleRepository {
                     status = it[VehicleTable.status],
                     location = it[VehicleTable.location],
                     kilometerRate = it[VehicleTable.kilometerRate],
-                    photoPath = it[VehicleTable.photoPath]
+                    photoPath = it[VehicleTable.photoPath],
+                    beginReservation = it[VehicleTable.beginReservation],
+                    endReservation = it[VehicleTable.endReservation]
                 )
             }
         }
@@ -64,28 +66,32 @@ class VehicleDao: VehicleRepository {
                 it[location] = item.location
                 it[kilometerRate] = item.kilometerRate
                 it[photoPath] = item.photoPath
+                it[beginReservation] = item.beginReservation
+                it[endReservation] = item.endReservation
             }
         }
     }
     
     override fun update(item: Vehicle) {
-        val vehicleId = findById(item.id)?.id ?: throw Exception("Vehicle not found")
+        val vehicleId = findById(item.id) ?: throw Exception("Vehicle not found")
         
         transaction {
-            VehicleTable.update({ VehicleTable.id eq vehicleId }) {
-                it[make] = item.make
-                it[model] = item.model
-                it[year] = item.year
-                it[category] = item.category
-                it[seats] = item.seats
-                it[range] = item.range
-                it[beginOdometer] = VehicleTable.beginOdometer
-                it[endOdometer] = VehicleTable.endOdometer
-                it[licensePlate] = item.licensePlate
-                it[status] = item.status
-                it[location] = item.location
-                it[kilometerRate] = item.kilometerRate
-                it[photoPath] = item.photoPath
+            VehicleTable.update({ VehicleTable.id eq vehicleId.id }) {
+                it[make] = item.make.ifEmpty { vehicleId.make }
+                it[model] = item.model.ifEmpty { vehicleId.model }
+                it[year] = if (item.year == 0) vehicleId.year else item.year
+                it[category] = item.category.ifEmpty { vehicleId.category }
+                it[seats] = if (item.seats == 0) vehicleId.seats else item.seats
+                it[range] = if (item.range == 0.0) vehicleId.range else item.range
+                it[beginOdometer] = if (item.beginOdometer == 0.0) vehicleId.beginOdometer else item.beginOdometer
+                it[endOdometer] = if (item.endOdometer == 0.0) vehicleId.endOdometer else item.endOdometer
+                it[licensePlate] = item.licensePlate.ifEmpty { vehicleId.licensePlate }
+                it[status] = if (item.status == VehicleStatus.NULL) vehicleId.status else item.status
+                it[location] = item.location.ifEmpty { vehicleId.location }
+                it[kilometerRate] = if (item.kilometerRate == 0.0) vehicleId.kilometerRate else item.kilometerRate
+                it[photoPath] = item.photoPath.ifEmpty { vehicleId.photoPath }
+                it[beginReservation] = item.beginReservation
+                it[endReservation] = item.endReservation
             }
         }
     }

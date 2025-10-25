@@ -11,7 +11,7 @@ import org.jetbrains.exposed.v1.datetime.datetime
 object UserTable: Table("User") {
     val id: Column<Long> = long("id").autoIncrement()
     val name: Column<String> = varchar("name", 255)
-    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.USER)
+    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.NULL)
     val phone: Column<String> = varchar("phone", 20)
     val password: Column<String> = varchar("password", 255)
     val email: Column<String> = varchar("email", 255)
@@ -39,5 +39,6 @@ data class User @OptIn(ExperimentalTime::class) constructor(
 
 enum class Role {
     USER,
-    ADMIN
+    ADMIN,
+    NULL
 }

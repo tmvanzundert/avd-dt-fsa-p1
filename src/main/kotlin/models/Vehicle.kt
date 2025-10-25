@@ -2,6 +2,10 @@ package com.example.models
 
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
+import kotlinx.serialization.Serializable
+import kotlin.time.ExperimentalTime
+import kotlinx.datetime.LocalDateTime
+import org.jetbrains.exposed.v1.datetime.*
 
 object VehicleTable: Table("Vehicle") {
     val id: Column<Long> = long("id")/*.autoIncrement()*/
@@ -14,15 +18,18 @@ object VehicleTable: Table("Vehicle") {
     val beginOdometer: Column<Double> = double("beginOdometer")
     val endOdometer: Column<Double> = double("endOdometer")
     val licensePlate: Column<String> = varchar("licensePlate", 20)
-    val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
+    val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.NULL)
     val location: Column<String> = varchar("location", 100)
     val kilometerRate: Column<Double> = double("kilometerRate")
     val photoPath: Column<String> = text("photoPath").clientDefault { "[]" }
+    val beginReservation: Column<LocalDateTime?> = datetime("beginReservation").nullable()
+    val endReservation: Column<LocalDateTime?> = datetime("endReservation").nullable()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
-data class Vehicle constructor(
+@Serializable
+data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val id: Long = 0L,
     val make: String,
     val model: String,
@@ -33,14 +40,18 @@ data class Vehicle constructor(
     val beginOdometer: Double,
     val endOdometer: Double,
     val licensePlate: String,
-    val status: VehicleStatus = VehicleStatus.AVAILABLE,
+    val status: VehicleStatus = VehicleStatus.NULL,
     val location: String,
     val kilometerRate: Double,
-    val photoPath: String = "[]"
+    val photoPath: String = "[]",
+    val beginReservation: LocalDateTime?,
+    val endReservation: LocalDateTime?
 )
 
+@Serializable
 enum class VehicleStatus {
     AVAILABLE,
     RENTED,
-    MAINTENANCE
+    MAINTENANCE,
+    NULL
 }
