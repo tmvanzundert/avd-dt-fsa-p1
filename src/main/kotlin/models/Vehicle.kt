@@ -33,7 +33,7 @@ data class Vehicle constructor(
     val beginOdometer: Double,
     val endOdometer: Double,
     val licensePlate: String,
-    val status: VehicleStatus = VehicleStatus.AVAILABLE,
+    val status: VehicleStatus = VehicleStatus.NULL,
     val location: String,
     val kilometerRate: Double,
     val photoPath: String = "[]"
@@ -42,5 +42,6 @@ data class Vehicle constructor(
 enum class VehicleStatus {
     AVAILABLE,
     RENTED,
-    MAINTENANCE
+    MAINTENANCE,
+    NULL
 }

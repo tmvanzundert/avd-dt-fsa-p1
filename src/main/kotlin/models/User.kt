@@ -39,5 +39,6 @@ data class User @OptIn(ExperimentalTime::class) constructor(
 
 enum class Role {
     USER,
-    ADMIN
+    ADMIN,
+    NULL
 }

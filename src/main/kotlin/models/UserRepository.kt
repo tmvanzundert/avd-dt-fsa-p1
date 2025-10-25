@@ -62,19 +62,19 @@ class UserDao: UserRepository<User, Long> {
     }
 
     override fun update(item: User) {
-        val userId = findById(item.id)?.id ?: throw Exception("User not found")
+        val userId = findById(item.id) ?: throw Exception("User not found")
 
         transaction {
-            UserTable.update({ UserTable.id eq userId }) {
-                it[name] = item.name
-                it[role] = item.role
-                it[phone] = item.phone
-                it[password] = item.password
-                it[email] = item.email
-                it[rating] = item.rating
-                it[createdAt] = item.createdAt
-                it[birthDate] = item.birthDate
-                it[driverLicenseNumber] = item.driverLicenseNumber
+            UserTable.update({ UserTable.id eq userId.id }) {
+                it[name] = item.name.ifEmpty { userId.name }
+                it[role] = if (item.role == Role.NULL) userId.role else item.role
+                it[phone] = item.phone.ifEmpty { userId.phone }
+                it[password] = item.password.ifEmpty { userId.password }
+                it[email] = item.email.ifEmpty { userId.email }
+                it[rating] = if (item.rating == 0.0f) userId.rating else item.rating
+                it[createdAt] = item.createdAt ?: userId.createdAt
+                it[birthDate] = item.birthDate ?: userId.birthDate
+                it[driverLicenseNumber] = item.driverLicenseNumber.ifEmpty { userId.driverLicenseNumber }
             }
         }
     }
