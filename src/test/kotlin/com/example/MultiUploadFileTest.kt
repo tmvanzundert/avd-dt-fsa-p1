@@ -1,19 +1,21 @@
-package com
+package com.example
 
-import com.example.configureDatabase
-import com.example.models.*
-import com.example.configureRouting
-import com.example.configureSerialization
-import com.example.configureStatusPages
-import io.ktor.client.request.*
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import io.ktor.client.request.forms.formData
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.testing.testApplication
 import java.io.File
 import kotlin.test.Test
-import kotlin.test.*
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 class MultiUploadFileTest {
     val boundary = "WebAppBoundary"
@@ -133,7 +135,7 @@ class MultiUploadFileTest {
                 )
             )
         }
-        assertEquals(HttpStatusCode.BadRequest, response.status)
+        assertEquals(HttpStatusCode.Companion.BadRequest, response.status)
         assertEquals("400: Bad Request", response.bodyAsText(Charsets.UTF_8))
     }
 
