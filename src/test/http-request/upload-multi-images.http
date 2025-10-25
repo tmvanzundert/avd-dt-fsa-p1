@@ -1,0 +1,38 @@
+POST http://localhost:8085/upload/cars/1
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="description"
+Content-Type: text/plain
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
+Content-Type: image/jpg
+
+< ./ktor.jpg
+--WebAppBoundary
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
+Content-Type: image/jpg
+
+< ./ktor.jpg
+--WebAppBoundary
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
+Content-Type: image/jpg
+
+< ./ktor.jpg
+--WebAppBoundary
+
+Four images test
+--WebAppBoundary
+Content-Disposition: form-data; name="image"; filename="ktor.jpg"
+Content-Type: image/jpg
+
+< ./ktor.jpg
+--WebAppBoundary

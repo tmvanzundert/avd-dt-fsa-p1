@@ -25,6 +25,8 @@ dependencies {
     implementation("io.ktor:ktor-server-auth-jwt:3.3.0")
     implementation("io.ktor:ktor-server-host-common:3.3.0")
     implementation("io.ktor:ktor-server-status-pages:3.3.0")
+    implementation("io.ktor:ktor-client-content-negotiation:3.3.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0")
     implementation("org.jetbrains.exposed:exposed-core:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
