@@ -132,7 +132,6 @@ fun Application.configureRouting() {
             val joinedSaved = savedFileNames.joinToString(", ")
             call.respondText("Uploaded ${savedFileNames.size} file(s): ${joinedSaved} to 'uploads/cars/${carId}/'")
 
-            // toDo() input paths in the database
         }
     }
 }
