@@ -2,6 +2,7 @@ package com.example.models
 
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
+import kotlinx.serialization.Serializable
 
 object VehicleTable: Table("Vehicle") {
     val id: Column<Long> = long("id")/*.autoIncrement()*/
@@ -22,6 +23,7 @@ object VehicleTable: Table("Vehicle") {
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
+@Serializable
 data class Vehicle constructor(
     val id: Long = 0L,
     val make: String,
@@ -39,6 +41,7 @@ data class Vehicle constructor(
     val photoPath: String = "[]"
 )
 
+@Serializable
 enum class VehicleStatus {
     AVAILABLE,
     RENTED,
