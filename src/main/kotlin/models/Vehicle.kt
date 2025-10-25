@@ -20,10 +20,11 @@ object VehicleTable: Table("Vehicle") {
     val licensePlate: Column<String> = varchar("licensePlate", 20)
     val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.NULL)
     val location: Column<String> = varchar("location", 100)
-    val kilometerRate: Column<Double> = double("kilometerRate")
+    val price: Column<Double> = double("price")
     val photoPath: Column<String> = text("photoPath").clientDefault { "[]" }
     val beginReservation: Column<LocalDateTime?> = datetime("beginReservation").nullable()
     val endReservation: Column<LocalDateTime?> = datetime("endReservation").nullable()
+    val totalYearlyUsageKilometers: Column<Double> = double("totalYearlyUsageKilometers")
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -42,10 +43,11 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val licensePlate: String,
     val status: VehicleStatus = VehicleStatus.NULL,
     val location: String,
-    val kilometerRate: Double,
+    val price: Double,
     val photoPath: String = "[]",
     val beginReservation: LocalDateTime?,
-    val endReservation: LocalDateTime?
+    val endReservation: LocalDateTime?,
+    var totalYearlyUsageKilometers: Double
 )
 
 @Serializable

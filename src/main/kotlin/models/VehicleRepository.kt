@@ -7,6 +7,9 @@ import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 interface VehicleRepository: CrudRepository<Vehicle, Long> {
     fun isAvailable(vehicleId: Long): Boolean
+    fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int = 15): Double
+    fun consumptionExpenses(vehicleId: Long): Double
+    fun calculateYearlyKilometers(vehicleId: Long): Double
 }
 
 class VehicleDao: VehicleRepository {
@@ -28,10 +31,11 @@ class VehicleDao: VehicleRepository {
                     licensePlate = it[VehicleTable.licensePlate],
                     status = it[VehicleTable.status],
                     location = it[VehicleTable.location],
-                    kilometerRate = it[VehicleTable.kilometerRate],
+                    price = it[VehicleTable.price],
                     photoPath = it[VehicleTable.photoPath],
                     beginReservation = it[VehicleTable.beginReservation],
-                    endReservation = it[VehicleTable.endReservation]
+                    endReservation = it[VehicleTable.endReservation],
+                    totalYearlyUsageKilometers = it[VehicleTable.totalYearlyUsageKilometers]
                 )
             }
         }
@@ -64,10 +68,11 @@ class VehicleDao: VehicleRepository {
                 it[licensePlate] = item.licensePlate
                 it[status] = item.status
                 it[location] = item.location
-                it[kilometerRate] = item.kilometerRate
+                it[price] = item.price
                 it[photoPath] = item.photoPath
                 it[beginReservation] = item.beginReservation
                 it[endReservation] = item.endReservation
+                it[totalYearlyUsageKilometers] = item.totalYearlyUsageKilometers
             }
         }
     }
@@ -88,10 +93,11 @@ class VehicleDao: VehicleRepository {
                 it[licensePlate] = item.licensePlate.ifEmpty { vehicleId.licensePlate }
                 it[status] = if (item.status == VehicleStatus.NULL) vehicleId.status else item.status
                 it[location] = item.location.ifEmpty { vehicleId.location }
-                it[kilometerRate] = if (item.kilometerRate == 0.0) vehicleId.kilometerRate else item.kilometerRate
+                it[price] = if (item.price == 0.0) vehicleId.price else item.price
                 it[photoPath] = item.photoPath.ifEmpty { vehicleId.photoPath }
                 it[beginReservation] = item.beginReservation
                 it[endReservation] = item.endReservation
+                it[totalYearlyUsageKilometers] = if (item.totalYearlyUsageKilometers == 0.0) vehicleId.totalYearlyUsageKilometers else item.totalYearlyUsageKilometers
             }
         }
     }
@@ -112,6 +118,28 @@ class VehicleDao: VehicleRepository {
     override fun isAvailable(vehicleId: Long): Boolean {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
         return vehicle.status == VehicleStatus.AVAILABLE
+    }
+
+    override fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int): Double {
+        val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
+
+        val depreciation = purchasePrice / depreciateInYears
+        val energyCost = vehicle.totalYearlyUsageKilometers / 100 * energyConsumption * energyPrice
+
+        return depreciation + maintenance + insurance + tax + energyCost
+    }
+
+    override fun consumptionExpenses(vehicleId: Long): Double {
+        val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
+        return (vehicle.endOdometer - vehicle.beginOdometer) / vehicle.price
+    }
+
+    override fun calculateYearlyKilometers(vehicleId: Long): Double {
+        val vehicle: Vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
+
+        vehicle.totalYearlyUsageKilometers = vehicle.endOdometer - vehicle.beginOdometer
+        update(vehicle)
+        return vehicle.totalYearlyUsageKilometers
     }
     
 }
