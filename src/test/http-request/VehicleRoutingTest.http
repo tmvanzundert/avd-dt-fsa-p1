@@ -1,12 +1,35 @@
+### Sign up and get Bearer token
+POST http://localhost:8085/signup
+Content-Type: application/json
+
+{
+  "username": "vehicleapitestuser",
+  "password": "vehicletestpass"
+}
+
+### Login and get Bearer token
+POST http://localhost:8085/login
+Content-Type: application/json
+
+{
+  "username": "vehicleapitestuser",
+  "password": "vehicletestpass"
+}
+
+> {% client.global.set("bearerToken", response.body.token); %}
+
 ### Get all vehicles
-GET http://localhost:8080/vehicles
+GET http://localhost:8085/vehicles
+Authorization: Bearer {{bearerToken}}
 
 ### Get vehicle by ID
-GET http://localhost:8080/vehicles/1
+GET http://localhost:8085/vehicles/1
+Authorization: Bearer {{bearerToken}}
 
 ### Create vehicle
-POST http://localhost:8080/vehicles
+POST http://localhost:8085/vehicles
 Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
 
 {
   "id": 1,
@@ -26,8 +49,9 @@ Content-Type: application/json
 }
 
 ### Update vehicle
-PUT http://localhost:8080/vehicles/1
+PUT http://localhost:8085/vehicles/1
 Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
 
 {
   "id": 1,
@@ -47,4 +71,5 @@ Content-Type: application/json
 }
 
 ### Delete vehicle
-DELETE http://localhost:8080/vehicles/1
+DELETE http://localhost:8085/vehicles/1
+Authorization: Bearer {{bearerToken}}

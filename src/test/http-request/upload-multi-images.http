@@ -1,10 +1,53 @@
+### Sign up and get Bearer token
+POST http://localhost:8085/signup
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+### Login and get Bearer token
+POST http://localhost:8085/login
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+> {% client.global.set("bearerToken", response.body.token); %}
+
+### Create vehicle with id=1
+POST http://localhost:8085/vehicles
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+{
+  "id": 1,
+  "make": "Toyota",
+  "model": "Corolla",
+  "year": 2020,
+  "category": "Sedan",
+  "seats": 5,
+  "range": 600.0,
+  "beginOdometer": 0.0,
+  "endOdometer": 0.0,
+  "licensePlate": "ABC-123",
+  "status": "AVAILABLE",
+  "location": "Amsterdam",
+  "kilometerRate": 0.25,
+  "photoPath": "[]"
+}
+
+### Upload multiple images for car with ID 1
 POST http://localhost:8085/upload/cars/1
 Content-Type: multipart/form-data; boundary=WebAppBoundary
+Authorization: Bearer {{bearerToken}}
 
 --WebAppBoundary
 Content-Disposition: form-data; name="description"
 Content-Type: text/plain
-Authorization: Bearer {{$auth.token("")}}
 
 Four images test
 --WebAppBoundary
@@ -36,4 +79,4 @@ Content-Disposition: form-data; name="image"; filename="ktor.jpg"
 Content-Type: image/jpg
 
 < ./ktor.jpg
---WebAppBoundary
+--WebAppBoundary--

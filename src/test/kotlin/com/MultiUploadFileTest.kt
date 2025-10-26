@@ -1,9 +1,14 @@
-package com.example
+package com
 
+import com.example.JWTConfig
+import com.example.configureDatabase
+import com.example.configureJWTAuthentication
+import com.example.configureRouting
+import com.example.configureSerialization
+import com.example.configureStatusPages
 import com.example.models.Role
 import com.example.models.User
 import com.example.models.UserDao
-
 import io.ktor.client.request.*
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.*
@@ -16,19 +21,13 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
 class MultiUploadFileTest {
-    val boundary = "WebAppBoundary"
-    val extension = "jpg"
-    val testPicture = "src/test/http-request/ktor.jpg"
-    lateinit var authToken: String
-
-    var imageBytes: ByteArray = byteArrayOf()
-
-    init {
-        imageBytes = File(testPicture).readBytes()
-    }
-
-    val userDao: UserDao = UserDao()
-    val user = User(
+    private val boundary = "WebAppBoundary"
+    private val extension = "jpg"
+    private val testPicture = "src/test/http-request/ktor.jpg"
+    private lateinit var authToken: String
+    private val imageBytes = File(testPicture).readBytes()
+    private val userDao = UserDao()
+    private val user = User(
         id = 1L,
         firstName = "John",
         lastName = "Cina",
@@ -36,12 +35,17 @@ class MultiUploadFileTest {
         address = "123 Main St",
         role = Role.USER,
         phone = "123-456-7890",
-        password = UserDao().hashPassword("test123"),
+        password = userDao.hashPassword("test123"),
         email = "",
         driverLicenseNumber = "D1234567"
     )
-
-    val jwtConfig = this.jwtConfig()
+    private val jwtConfig = JWTConfig(
+        secret = "secret",
+        issuer = "http://127.0.0.1:8085",
+        audience = "http://127.0.0.1:8085",
+        realm = "Access protected routes",
+        tokenExpiry = 86400000
+    )
 
     @BeforeTest
     fun build() = testApplication {
@@ -52,12 +56,8 @@ class MultiUploadFileTest {
             configureStatusPages()
             configureDatabase()
         }
-
         val jsonBody = """
-            {
-                "username": "${user.username}",
-                "password": "test123"
-            }
+            {"username": "${user.username}", "password": "test123"}
         """.trimIndent()
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
@@ -65,8 +65,7 @@ class MultiUploadFileTest {
             setBody(jsonBody)
         }
         assertEquals(HttpStatusCode.OK, response.status)
-        val tokenJson = response.bodyAsText()
-        val tokenResponse = Json.decodeFromString<TokenResponse>(tokenJson)
+        val tokenResponse = Json.decodeFromString<TokenResponse>(response.bodyAsText())
         authToken = tokenResponse.token
     }
 
@@ -79,19 +78,18 @@ class MultiUploadFileTest {
             configureStatusPages()
             configureDatabase()
         }
-
         val response = client.post("/upload/cars/1") {
             bearerAuth(authToken)
             setBody(
                 MultiPartFormDataContent(
                     formData {
                         append("description", "Four images test")
-                        repeat(4) { idx ->
-                            val name = "photo${idx + 1}.$extension"
+                        repeat(4) {
+                            val name = "photo${it + 1}.$extension"
                             append(
                                 "image",
                                 imageBytes,
-                                Headers.Companion.build {
+                                Headers.build {
                                     append(HttpHeaders.ContentType, "image/$extension")
                                     append(HttpHeaders.ContentDisposition, "filename=\"$name\"")
                                 }
@@ -103,20 +101,14 @@ class MultiUploadFileTest {
                 )
             )
         }
-
         val body = response.bodyAsText(Charsets.UTF_8)
-        assertNotNull(response)
         assertTrue(body.contains("Uploaded 4 file(s)"), "Expected multi-upload summary, got: '$body'")
-
-        // Verify files were saved as picture_1..picture_4 under the car-specific directory
-        (1..4).forEach { idx ->
-            val expected = File("uploads/cars/1/picture_${idx}.$extension")
+        (1..4).forEach {
+            val expected = File("uploads/cars/1/picture_${it}.$extension")
             assertTrue(expected.exists(), "Expected file to exist: ${expected.path}")
         }
-
-        // Cleanup
-        (1..4).forEach { idx ->
-            File("uploads/cars/1/picture_${idx}.$extension").delete()
+        (1..4).forEach {
+            File("uploads/cars/1/picture_${it}.$extension").delete()
         }
     }
 
@@ -129,7 +121,6 @@ class MultiUploadFileTest {
             configureStatusPages()
             configureDatabase()
         }
-
         val response = client.post("/upload/cars/1") {
             bearerAuth(authToken)
             setBody(
@@ -139,7 +130,7 @@ class MultiUploadFileTest {
                         append(
                             "image",
                             imageBytes,
-                            Headers.Companion.build {
+                            Headers.build {
                                 append(HttpHeaders.ContentType, "image/$extension")
                                 append(HttpHeaders.ContentDisposition, "filename=\"ktor.$extension\"")
                             }
@@ -150,13 +141,10 @@ class MultiUploadFileTest {
                 )
             )
         }
-
         assertEquals(
             "Ktor logo is uploaded to 'uploads/cars/1/picture_1.$extension'",
             response.bodyAsText(Charsets.UTF_8)
         )
-
-        // File should be saved with sequential name in per-car directory
         val saved = File("uploads/cars/1/picture_1.$extension")
         assertTrue(saved.exists(), "Expected uploaded file to be saved: ${saved.path}")
         saved.delete()
@@ -183,7 +171,7 @@ class MultiUploadFileTest {
                 )
             )
         }
-        assertEquals(HttpStatusCode.Companion.BadRequest, response.status)
+        assertEquals(HttpStatusCode.BadRequest, response.status)
         assertEquals("400: Bad Request", response.bodyAsText(Charsets.UTF_8))
     }
 
@@ -200,10 +188,8 @@ class MultiUploadFileTest {
         val carDir = File("uploads/cars/$carId").apply { mkdirs() }
         val oldFile = File(carDir, "old_to_be_deleted.txt").apply { writeText("old") }
         assertTrue(oldFile.exists(), "Precondition failed: old file should exist before upload")
-
-        val imageBytes = File(testPicture).readBytes()
-
         val response = client.post("/upload/cars/$carId") {
+            bearerAuth(authToken)
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -211,7 +197,7 @@ class MultiUploadFileTest {
                         append(
                             "image",
                             imageBytes,
-                            Headers.Companion.build {
+                            Headers.build {
                                 append(HttpHeaders.ContentType, "image/$extension")
                                 append(HttpHeaders.ContentDisposition, "filename=\"ktor_logo.$extension\"")
                             }
@@ -222,38 +208,20 @@ class MultiUploadFileTest {
                 )
             )
         }
-
         assertEquals(
             "Cleanup test is uploaded to 'uploads/cars/1/picture_1.$extension'",
             response.bodyAsText(Charsets.UTF_8)
         )
-
-        // Old file must be removed by cleanup
         assertFalse(oldFile.exists(), "Expected cleanup to remove old file: ${oldFile.path}")
-        // New file must exist
         val saved = File(carDir, "picture_1.$extension")
         assertTrue(saved.exists(), "Expected uploaded file to be saved: ${saved.path}")
-
-        // Cleanup
         saved.delete()
         carDir.deleteRecursively()
     }
 
     @AfterTest
     fun end() {
-        if (userDao.findByUsername(user.username) != null) {
-            userDao.deleteByUsername(user.username)
-        }
-    }
-
-    fun jwtConfig(): JWTConfig {
-        return JWTConfig(
-            secret = "secret",
-            issuer = "http://127.0.0.1:8085",
-            audience = "http://127.0.0.1:8085",
-            realm = "Access protected routes",
-            tokenExpiry = 86400000
-        )
+        userDao.findByUsername(user.username)?.let { userDao.deleteByUsername(user.username) }
     }
 }
 

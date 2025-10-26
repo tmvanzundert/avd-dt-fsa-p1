@@ -1,12 +1,35 @@
+### Sign up and get Bearer token
+POST http://localhost:8085/signup
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+### Login and get Bearer token
+POST http://localhost:8085/login
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+> {% client.global.set("bearerToken", response.body.token); %}
+
 ### Get all users
-GET http://localhost:8080/users
+GET http://localhost:8085/users
+Authorization: Bearer {{bearerToken}}
 
 ### Get user by ID
-GET http://localhost:8080/users/1
+GET http://localhost:8085/users/1
+Authorization: Bearer {{bearerToken}}
 
 ### Create user
-POST http://localhost:8080/users
+POST http://localhost:8085/users
 Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
 
 {
   "id": 1,
@@ -19,8 +42,9 @@ Content-Type: application/json
 }
 
 ### Update user
-PUT http://localhost:8080/users/1
+PUT http://localhost:8085/users/1
 Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
 
 {
   "id": 1,
@@ -33,4 +57,5 @@ Content-Type: application/json
 }
 
 ### Delete user
-DELETE http://localhost:8080/users/1
+DELETE http://localhost:8085/users/1
+Authorization: Bearer {{bearerToken}}
