@@ -10,6 +10,7 @@ private interface UserRepository<User, Long>: CrudRepository<User, Long> {
     fun findByUsername(username: String): User?
     fun checkPassword(password: Password): Boolean
     fun hashPassword(password: String): String
+    fun deleteByUsername(username: String)
 }
 
 @OptIn(ExperimentalTime::class)
@@ -24,6 +25,7 @@ class UserDao: UserRepository<User, Long> {
                     firstName = it[UserTable.firstName],
                     lastName = it[UserTable.lastName],
                     username = it[UserTable.username],
+                    address = it[UserTable.address],
                     role = it[UserTable.role],
                     phone = it[UserTable.phone],
                     password = it[UserTable.password],
@@ -56,6 +58,7 @@ class UserDao: UserRepository<User, Long> {
                 it[firstName] = item.firstName
                 it[lastName] = item.lastName
                 it[username] = item.username
+                it[address] = item.address
                 it[role] = item.role
                 it[phone] = item.phone
                 it[password] = item.password
@@ -76,7 +79,8 @@ class UserDao: UserRepository<User, Long> {
                 it[firstName] = item.firstName.ifEmpty { userId.firstName }
                 it[lastName] = item.lastName.ifEmpty { userId.lastName }
                 it[username] = item.username.ifEmpty { userId.username }
-                it[role] = if (item.role == Role.NULL) userId.role else item.role
+                it[address] = item.address.ifEmpty { userId.address }
+                it[role] = if (item.role == Role.DEFAULT) userId.role else item.role
                 it[phone] = item.phone.ifEmpty { userId.phone }
                 it[password] = item.password.ifEmpty { userId.password }
                 it[email] = item.email.ifEmpty { userId.email }
@@ -99,6 +103,12 @@ class UserDao: UserRepository<User, Long> {
         if (deleteUser == 0) {
             throw Exception("Failed to delete user")
         }
+    }
+
+    override fun deleteByUsername(username: String) {
+        val users = findAll()
+        val userId = users.find { it.username == username }?.id ?: throw Exception("User not found")
+        delete(userId)
     }
 
     override fun findByUsername(username: String): User? {

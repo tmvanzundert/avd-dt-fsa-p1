@@ -22,6 +22,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
                 firstName = "",
                 lastName = "",
                 username = requestData.username,
+                address = "",
                 role = Role.USER,
                 phone = "",
                 password = UserDao().hashPassword(requestData.password),

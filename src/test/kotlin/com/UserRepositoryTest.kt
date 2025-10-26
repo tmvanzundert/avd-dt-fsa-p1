@@ -1,11 +1,21 @@
 package com
 
 import com.example.*
+import com.example.jwtConfig
 import com.example.models.*
-import io.ktor.client.request.get
+import io.ktor.client.request.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.headers
+import io.ktor.server.application.Application
 import io.ktor.server.testing.*
+import io.netty.handler.codec.http.HttpHeaders.setHeader
 import kotlin.test.*
+import kotlinx.serialization.Serializable
+import io.ktor.server.plugins.contentnegotiation.*
+import io.ktor.serialization.*
 
 class UserRepositoryTest {
 
@@ -14,6 +24,7 @@ class UserRepositoryTest {
         firstName = "John",
         lastName = "Cina",
         username = "jcina",
+        address = "123 Main St",
         role = Role.USER,
         phone = "123-456-7890",
         password = UserDao().hashPassword("test123"),
@@ -21,19 +32,31 @@ class UserRepositoryTest {
         driverLicenseNumber = "D1234567"
     )
 
+    val jwtConfig = this.jwtConfig()
     @BeforeTest
     fun testGetUsersEndpoint() = testApplication {
         application {
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }
-        val response = client.get("/users")
-        assertEquals(HttpStatusCode.OK, response.status)
-        if (UserDao().findById(1) == null) {
-            UserDao().create(user)
+
+        val jsonBody = """
+            {
+                "username": "${user.username}",
+                "password": "test123"
+            }
+        """.trimIndent()
+        val response = client.post("/signup") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(jsonBody)
         }
+        assertEquals(HttpStatusCode.OK, response.status)
+
+        UserDao().update(user)
     }
 
     @Test
@@ -76,5 +99,15 @@ class UserRepositoryTest {
         UserDao().delete(1)
         val found = UserDao().findById(1)
         assertNull(found)
+    }
+
+    fun jwtConfig(): JWTConfig {
+        return JWTConfig(
+            secret = "secret",
+            issuer = "http://127.0.0.1:8085",
+            audience = "http://127.0.0.1:8085",
+            realm = "Access protected routes",
+            tokenExpiry = 86400000
+        )
     }
 }

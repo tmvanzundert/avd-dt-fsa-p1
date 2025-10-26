@@ -1,5 +1,6 @@
 val kotlin_version: String by project
 val logback_version: String by project
+val ktor_version: String by project
 
 plugins {
     kotlin("jvm") version "2.2.20"
@@ -32,6 +33,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
     implementation("org.mindrot:jbcrypt:0.4")
+    implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host-jvm:3.3.0")
