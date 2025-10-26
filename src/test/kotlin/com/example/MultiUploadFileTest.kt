@@ -1,26 +1,25 @@
 package com.example
 
-import io.ktor.client.request.forms.MultiPartFormDataContent
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.post
-import io.ktor.client.request.setBody
+import com.example.models.Role
+import com.example.models.User
+import com.example.models.UserDao
+
+import io.ktor.client.request.*
+import io.ktor.client.request.bearerAuth
+import io.ktor.client.request.forms.*
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.ContentType
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
+import io.ktor.http.*
 import io.ktor.server.testing.testApplication
 import java.io.File
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 class MultiUploadFileTest {
     val boundary = "WebAppBoundary"
     val extension = "jpg"
     val testPicture = "src/test/http-request/ktor.jpg"
+    lateinit var authToken: String
 
     var imageBytes: ByteArray = byteArrayOf()
 
@@ -28,16 +27,61 @@ class MultiUploadFileTest {
         imageBytes = File(testPicture).readBytes()
     }
 
+    val userDao: UserDao = UserDao()
+    val user = User(
+        id = 1L,
+        firstName = "John",
+        lastName = "Cina",
+        username = "jcina",
+        address = "123 Main St",
+        role = Role.USER,
+        phone = "123-456-7890",
+        password = UserDao().hashPassword("test123"),
+        email = "",
+        driverLicenseNumber = "D1234567"
+    )
+
+    val jwtConfig = this.jwtConfig()
+
+    @BeforeTest
+    fun build() = testApplication {
+        application {
+            configureSerialization()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
+            configureStatusPages()
+            configureDatabase()
+        }
+
+        val jsonBody = """
+            {
+                "username": "${user.username}",
+                "password": "test123"
+            }
+        """.trimIndent()
+        val response = client.post("/signup") {
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(jsonBody)
+        }
+        assertEquals(HttpStatusCode.OK, response.status)
+        val tokenJson = response.bodyAsText()
+        val tokenResponse = Json.decodeFromString<TokenResponse>(tokenJson)
+        authToken = tokenResponse.token
+    }
+
     @Test
     fun testUploadFourImages() = testApplication {
         application {
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }
 
         val response = client.post("/upload/cars/1") {
+            bearerAuth(authToken)
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -80,12 +124,14 @@ class MultiUploadFileTest {
     fun testUploadSingleImage() = testApplication {
         application {
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }
 
         val response = client.post("/upload/cars/1") {
+            bearerAuth(authToken)
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -120,11 +166,13 @@ class MultiUploadFileTest {
     fun testUploadNoImages() = testApplication {
         application {
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }
         val response = client.post("/upload/cars/1") {
+            bearerAuth(authToken)
             setBody(
                 MultiPartFormDataContent(
                     formData {
@@ -143,7 +191,8 @@ class MultiUploadFileTest {
     fun testCleanupCarDirectoryBeforeUpload() = testApplication {
         application {
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }
@@ -189,4 +238,24 @@ class MultiUploadFileTest {
         saved.delete()
         carDir.deleteRecursively()
     }
+
+    @AfterTest
+    fun end() {
+        if (userDao.findByUsername(user.username) != null) {
+            userDao.deleteByUsername(user.username)
+        }
+    }
+
+    fun jwtConfig(): JWTConfig {
+        return JWTConfig(
+            secret = "secret",
+            issuer = "http://127.0.0.1:8085",
+            audience = "http://127.0.0.1:8085",
+            realm = "Access protected routes",
+            tokenExpiry = 86400000
+        )
+    }
 }
+
+@Serializable
+data class TokenResponse(val token: String)

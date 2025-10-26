@@ -2,9 +2,7 @@ package com.example.models
 
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
-import java.util.UUID
 import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.datetime.datetime
 
@@ -13,7 +11,8 @@ object UserTable: Table("User") {
     val firstName: Column<String> = varchar("firstName", 255)
     val lastName: Column<String> = varchar("lastName", 255)
     val username: Column<String> = varchar("username", 50).uniqueIndex()
-    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.NULL)
+    val address: Column<String> = varchar("address", 255)
+    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.DEFAULT)
     val phone: Column<String> = varchar("phone", 20)
     val password: Column<String> = varchar("password", 255)
     val email: Column<String> = varchar("email", 255)
@@ -31,6 +30,7 @@ data class User @OptIn(ExperimentalTime::class) constructor(
     val firstName: String,
     val lastName: String,
     val username: String,
+    val address: String,
     val role: Role = Role.USER,
     val phone: String,
     val password: String,
@@ -44,7 +44,7 @@ data class User @OptIn(ExperimentalTime::class) constructor(
 enum class Role {
     USER,
     ADMIN,
-    NULL
+    DEFAULT
 }
 
 data class Password (
