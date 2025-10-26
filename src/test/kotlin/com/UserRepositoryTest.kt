@@ -11,10 +11,12 @@ class UserRepositoryTest {
 
     val user = User(
         id = 1L,
-        name = "John Cina",
+        firstName = "John",
+        lastName = "Cina",
+        username = "jcina",
         role = Role.USER,
         phone = "123-456-7890",
-        password = "password123",
+        password = UserDao().hashPassword("test123"),
         email = "",
         driverLicenseNumber = "D1234567"
     )
@@ -38,7 +40,7 @@ class UserRepositoryTest {
     fun testCreateUser() {
         val found = UserDao().findById(1)
         assertNotNull(found)
-        assertEquals("John Cina", found.name)
+        assertEquals("John Cina", "${found.firstName} ${found.lastName}")
         UserDao().delete(1)
     }
 
@@ -46,14 +48,26 @@ class UserRepositoryTest {
     fun testFindById() {
         val found = UserDao().findById(1)
         assertNotNull(found)
-        assertEquals("John Cina", found.name)
+        assertEquals("John Cina", "${found.firstName} ${found.lastName}")
         UserDao().delete(1)
     }
 
     @Test
     fun testFindAll() {
         val allUsers = UserDao().findAll()
-        assertTrue(allUsers.any { it.name == "John Cina" })
+        assertTrue(allUsers.any { "${it.firstName} ${it.lastName}" == "John Cina" })
+        UserDao().delete(1)
+    }
+
+    @Test
+    fun testPasswordUser() {
+        val password = Password(
+            hash = user.password,
+            plainText = "test123"
+        )
+
+        val isPasswordValid = UserDao().checkPassword(password)
+        assertTrue(isPasswordValid)
         UserDao().delete(1)
     }
 
