@@ -1,3 +1,5 @@
+USE plugandplay;
+
 INSERT INTO `User` (
     `id`,
     `firstName`,
