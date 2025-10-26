@@ -31,8 +31,10 @@ class VehicleRepositoryTest {
     @BeforeTest
     fun setup() = testApplication {
         application {
+            val jwtConfig = jwtConfig()
             configureSerialization()
-            configureRouting()
+            configureJWTAuthentication(jwtConfig)
+            configureRouting(jwtConfig)
             configureStatusPages()
             configureDatabase()
         }

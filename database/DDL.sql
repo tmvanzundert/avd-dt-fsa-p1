@@ -13,6 +13,7 @@ CREATE TABLE
         `firstName` VARCHAR(255) NOT NULL,
         `lastName` VARCHAR(255) NOT NULL,
         `username` VARCHAR(255) NOT NULL,
+        `address` VARCHAR(255) NOT NULL,
         `role` ENUM (
             "USER",
             "ADMIN",
