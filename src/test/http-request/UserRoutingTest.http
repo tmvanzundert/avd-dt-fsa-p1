@@ -32,28 +32,16 @@ Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
 {
-  "id": 1,
-  "name": "John Cina",
+  "id": 5,
   "role": "USER",
   "phone": "123-456-7890",
   "password": "password123",
   "email": "john@example.com",
-  "driverLicenseNumber": "D1234567"
-}
-
-### Update user
-PUT http://localhost:8085/users/1
-Content-Type: application/json
-Authorization: Bearer {{bearerToken}}
-
-{
-  "id": 1,
-  "name": "Jane Doe",
-  "role": "USER",
-  "phone": "123-456-7890",
-  "password": "password123",
-  "email": "john@example.com",
-  "driverLicenseNumber": "D1234567"
+  "driverLicenseNumber": "D1234567",
+  "firstName": "",
+  "lastName": "",
+  "username": "test",
+  "address": ""
 }
 
 ### Delete user
