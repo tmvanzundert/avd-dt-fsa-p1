@@ -31,6 +31,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:1.0.0-rc-2")
     implementation("org.jetbrains.exposed:exposed-kotlin-datetime:1.0.0-rc-2")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
+    implementation("org.mindrot:jbcrypt:0.4")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host-jvm:3.3.0")

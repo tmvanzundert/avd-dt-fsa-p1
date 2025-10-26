@@ -4,9 +4,12 @@ import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.core.*
+import org.mindrot.jbcrypt.BCrypt
 
 private interface UserRepository<User, Long>: CrudRepository<User, Long> {
-
+    fun findByUsername(username: String): User?
+    fun checkPassword(password: Password): Boolean
+    fun hashPassword(password: String): String
 }
 
 @OptIn(ExperimentalTime::class)
@@ -18,7 +21,9 @@ class UserDao: UserRepository<User, Long> {
             users = UserTable.selectAll().map {
                 User(
                     id = it[UserTable.id],
-                    name = it[UserTable.name],
+                    firstName = it[UserTable.firstName],
+                    lastName = it[UserTable.lastName],
+                    username = it[UserTable.username],
                     role = it[UserTable.role],
                     phone = it[UserTable.phone],
                     password = it[UserTable.password],
@@ -42,13 +47,15 @@ class UserDao: UserRepository<User, Long> {
     override fun create(item: User) {
         // Check if user already exists
         findById(item.id)?.id ?.let {
-            throw Exception("User ${item.name} already exists")
+            throw Exception("User ${item.firstName} ${item.lastName} already exists")
         }
 
         transaction {
             UserTable.insert {
                 it[id] = item.id
-                it[name] = item.name
+                it[firstName] = item.firstName
+                it[lastName] = item.lastName
+                it[username] = item.username
                 it[role] = item.role
                 it[phone] = item.phone
                 it[password] = item.password
@@ -66,7 +73,9 @@ class UserDao: UserRepository<User, Long> {
 
         transaction {
             UserTable.update({ UserTable.id eq userId.id }) {
-                it[name] = item.name.ifEmpty { userId.name }
+                it[firstName] = item.firstName.ifEmpty { userId.firstName }
+                it[lastName] = item.lastName.ifEmpty { userId.lastName }
+                it[username] = item.username.ifEmpty { userId.username }
                 it[role] = if (item.role == Role.NULL) userId.role else item.role
                 it[phone] = item.phone.ifEmpty { userId.phone }
                 it[password] = item.password.ifEmpty { userId.password }
@@ -90,6 +99,22 @@ class UserDao: UserRepository<User, Long> {
         if (deleteUser == 0) {
             throw Exception("Failed to delete user")
         }
+    }
+
+    override fun findByUsername(username: String): User? {
+        val users = findAll()
+        return users.find { it.username == username }
+    }
+
+    override fun checkPassword(password: Password): Boolean {
+        val hash = password.hash
+        val plainText = password.plainText ?: return false
+        return BCrypt.checkpw(plainText, hash)
+    }
+
+    override fun hashPassword(password: String): String {
+        val salt = BCrypt.gensalt()
+        return BCrypt.hashpw(password, salt)
     }
 
 }
