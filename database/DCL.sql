@@ -1,5 +1,3 @@
--- DCL: Used for managing permissions and access control
-
 -- Drop existing users if they exist
 DROP USER IF EXISTS 'dbuser'@'localhost';
 DROP USER IF EXISTS 'svandriel'@'%';
