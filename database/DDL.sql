@@ -49,25 +49,17 @@ CREATE TABLE IF NOT EXISTS vehicle_status (
 
 CREATE TABLE IF NOT EXISTS vehicles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    make VARCHAR(80),
-    model VARCHAR(80),
-    year INT,
+    make VARCHAR(80) NOT NULL,
+    model VARCHAR(80) NOT NULL,
+    year INT NOT NULL,
     category VARCHAR(80),
-    seats INT,
+    seats INT NOT NULL,
     range_km INT,
-    begin_odometer INT,
-    end_odometer INT,
-    license_plate VARCHAR(32) UNIQUE,
-    status VARCHAR(32),
+    license_plate VARCHAR(32) UNIQUE NOT NULL,
     location_id BIGINT,
-    price_day DECIMAL(10,2),
-    photo_path VARCHAR(255),
-    begin_reservation TIMESTAMP,
-    end_reservation TIMESTAMP,
-    total_yearly_usage_km DECIMAL(12,1),
     owner_user_id BIGINT,
-    FOREIGN KEY (location_id) REFERENCES locations(id),
-    FOREIGN KEY (owner_user_id) REFERENCES users(id)
+    FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS rate_plans (
@@ -91,12 +83,12 @@ CREATE TABLE IF NOT EXISTS reservations (
     total_amount DECIMAL(12,2),
     pickup_location_id BIGINT,
     dropoff_location_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id),
-    FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id),
-    FOREIGN KEY (staff_id) REFERENCES users(id),
-    FOREIGN KEY (pickup_location_id) REFERENCES locations(id),
-    FOREIGN KEY (dropoff_location_id) REFERENCES locations(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (staff_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (pickup_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (dropoff_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS rental_contracts (
@@ -107,7 +99,7 @@ CREATE TABLE IF NOT EXISTS rental_contracts (
     pickup_time TIMESTAMP,
     return_time TIMESTAMP,
     signed_at TIMESTAMP,
-    FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS payments (
@@ -120,7 +112,7 @@ CREATE TABLE IF NOT EXISTS payments (
     authorized_at TIMESTAMP,
     captured_at TIMESTAMP,
     refunded_at TIMESTAMP,
-    FOREIGN KEY (reservation_id) REFERENCES reservations(id)
+    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS reviews (
@@ -131,7 +123,7 @@ CREATE TABLE IF NOT EXISTS reviews (
     review_date TIMESTAMP,
     target_type VARCHAR(40),
     target_id BIGINT,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
@@ -141,7 +133,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     message TEXT,
     timestamp TIMESTAMP,
     is_read BOOLEAN,
-    FOREIGN KEY (user_id) REFERENCES users(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS media_assets (
