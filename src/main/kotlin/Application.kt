@@ -2,7 +2,6 @@ package com.example
 
 import io.ktor.server.application.*
 import io.ktor.server.netty.EngineMain
-import kotlinx.serialization.Serializable
 
 
 fun main(args: Array<String>): Unit = EngineMain.main(args)
@@ -16,6 +15,7 @@ fun Application.module() {
     configureDatabase()
 }
 
+// Create the JWT authentication config to pass to the routing and authentication
 fun Application.jwtConfig(): JWTConfig {
     return JWTConfig(
         secret = environment.config.property("ktor.jwt.secret").getString(),
@@ -25,6 +25,3 @@ fun Application.jwtConfig(): JWTConfig {
         tokenExpiry = environment.config.property("ktor.jwt.tokenExpiry").getString().toLong()
     )
 }
-
-@Serializable
-data class AuthRequest(val username: String, val password: String)

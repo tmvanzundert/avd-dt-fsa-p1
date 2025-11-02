@@ -2,14 +2,25 @@ package com.example.routes
 
 import com.example.models.User
 import com.example.models.UserDao
+import com.example.models.Vehicle
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlin.reflect.KClass
 
-fun Route.userRoutes(userDao: UserDao) {
+class UserRoute(entityClass: KClass<User>, override val dao: UserDao) : ModelRoute<UserDao, User>("user", entityClass) {
+
+}
+
+
+
+fun userRoutes(userDao: UserDao) {
+    val user: KClass<User> = User::class
+    UserRoute(user, userDao)
+
     // List all users
-    get("/users") {
+    /*get("/users") {
         call.respond(userDao.findAll())
     }
 
@@ -72,5 +83,5 @@ fun Route.userRoutes(userDao: UserDao) {
         } catch (e: Exception) {
             call.respond(HttpStatusCode.NotFound, e.message ?: "User not found")
         }
-    }
+    }*/
 }

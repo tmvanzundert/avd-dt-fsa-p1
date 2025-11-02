@@ -1,20 +1,14 @@
 package com.example.routes
 
-import com.example.models.Vehicle
-import com.example.models.VehicleDao
-import com.example.models.VehicleStatus
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
+import com.example.models.*
+import io.ktor.http.content.*
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.post
+import io.ktor.server.routing.*
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.copyAndClose
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
-import java.io.File
-import java.io.IOException
+import kotlinx.serialization.json.*
+import java.io.*
 import kotlin.text.toLong
 
 fun Route.imageRoutes() {
