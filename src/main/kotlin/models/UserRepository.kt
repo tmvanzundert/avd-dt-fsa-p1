@@ -1,11 +1,15 @@
 package com.example.models
 
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.mindrot.jbcrypt.BCrypt
+import kotlin.time.Clock
 
 // Implement these functions in the User DAO
 private interface UserRepository<User, Long>: CrudRepository<User, Long> {
@@ -13,6 +17,7 @@ private interface UserRepository<User, Long>: CrudRepository<User, Long> {
     fun checkPassword(password: Password): Boolean
     fun hashPassword(password: String): String
     fun deleteByUsername(username: String)
+    fun setCreatedAt(id: Long)
 }
 
 @OptIn(ExperimentalTime::class)
@@ -26,6 +31,11 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
     }
 
     // Find a user by username
+    override fun setCreatedAt(id: Long) {
+        val currentDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        updateProperty(id, "createdAt", currentDateTime)
+    }
+
     override fun findByUsername(username: String): User? {
         val users = findAll()
         return users.find { it.username == username }

@@ -2,14 +2,17 @@ package com.example.models
 
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import org.jetbrains.exposed.v1.core.statements.UpdateStatement
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import kotlin.reflect.full.memberProperties
 
 interface CrudRepository<T, ID> {
     fun findAll(): List<T>
     fun findById(id: ID): T?
     fun create(entity: T)
     fun update(entity: T)
+    fun updateProperty(id: ID, propertyName: String, propertyValue: Any)
     fun delete(id: ID)
 }
 
@@ -35,13 +38,29 @@ abstract class CrudDAO<T, ID, Table: org.jetbrains.exposed.v1.core.Table>(
     // Private function to search a property in an object by its name
     private fun getObjectName(entity: T, type: String): Any {
         val idProperty = entity!!::class.members.firstOrNull { it.name == type }
-            ?: throw IllegalArgumentException("Entity does not have an '$type' property")
+            ?: throw IllegalArgumentException("Entity does not have a '$type' property")
 
         val idValue = idProperty.call(entity)
             ?: throw IllegalArgumentException("Entity '$type' property is null")
 
         @Suppress("UNCHECKED_CAST")
         return idValue
+    }
+
+    // Helper function to find and set a single column's value in the update statement
+    private fun setColumnValue(table: Table, updateStatement: UpdateStatement,
+        columnName: String, value: Any) {
+        // Find the KProperty (member of the Table class) that matches columnName
+        val kProperty = table::class.memberProperties.firstOrNull { it.name == columnName }
+            ?: throw IllegalArgumentException("Column '$columnName' not found in table ${table::class.simpleName}")
+
+        // Ensure the found property is indeed an Exposed Column
+        @Suppress("UNCHECKED_CAST")
+        val column = kProperty.getter.call(table) as? Column<Any>
+            ?: throw IllegalStateException("Property '$columnName' is not a database column.")
+
+        // Set the column value in the update statement
+        updateStatement[column] = value
     }
 
     // Generic method to fetch all records from the database
@@ -89,6 +108,17 @@ abstract class CrudDAO<T, ID, Table: org.jetbrains.exposed.v1.core.Table>(
         transaction {
             table.update({ getTableId(table) eq objectId }) {
                 createEntity(entity, it)
+            }
+        }
+    }
+
+    // Update a single property without having to overwrite the whole object
+    override fun updateProperty(id: ID, propertyName: String, propertyValue: Any) {
+        findById(id) ?: throw Exception("Entity with ID $id does not exist")
+
+        transaction {
+            table.update({ getTableId(table) eq id }) { statement ->
+                setColumnValue(table, statement, propertyName, propertyValue)
             }
         }
     }
