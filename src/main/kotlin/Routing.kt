@@ -4,10 +4,12 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import com.example.models.*
 import com.example.routes.*
+import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
+import kotlin.reflect.full.memberProperties
 
 // Store the username and password when logging in
 @Serializable
@@ -24,7 +26,19 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
         post("signup") {
             // Receive username and password
             val requestData = call.receive<AuthRequest>()
-            // val requestData: User = call.receive<User>()
+
+            // Set the User from the request and throw error if not all fields are filled in
+            try {
+                // val requestData: User = call.receive<User>()
+            }
+            catch (e: Exception) {
+                val allowedProperties: MutableList<String> = User::class.memberProperties.map { it.name } as MutableList<String>
+                val propertiesToRemove = listOf("createdAt", "id", "rating", "role")
+                allowedProperties.removeAll { it in propertiesToRemove }
+                return@post call.respondText("Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e")
+            }
+
+            // Set the username and password
             val username = requestData.username
             val password = requestData.password
 
