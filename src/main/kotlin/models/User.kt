@@ -6,6 +6,7 @@ import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.datetime.datetime
 
+// Imports all the columns from the database and store in a usable object
 object UserTable: Table("User") {
     val id: Column<Long> = long("id").autoIncrement()
     val firstName: Column<String> = varchar("firstName", 255)
@@ -24,6 +25,7 @@ object UserTable: Table("User") {
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
+// User
 @Serializable
 data class User @OptIn(ExperimentalTime::class) constructor(
     val id: Long = 0L,
@@ -41,12 +43,14 @@ data class User @OptIn(ExperimentalTime::class) constructor(
     val driverLicenseNumber: String
 )
 
+// Allowed roles
 enum class Role {
     USER,
     ADMIN,
     DEFAULT
 }
 
+// Store the plaintext and hash in an object
 data class Password (
     val hash: String,
     val plainText: String?

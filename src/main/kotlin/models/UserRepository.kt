@@ -4,8 +4,10 @@ import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.core.*
+import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.mindrot.jbcrypt.BCrypt
 
+// Implement these functions in the User DAO
 private interface UserRepository<User, Long>: CrudRepository<User, Long> {
     fun findByUsername(username: String): User?
     fun checkPassword(password: Password): Boolean
@@ -14,117 +16,68 @@ private interface UserRepository<User, Long>: CrudRepository<User, Long> {
 }
 
 @OptIn(ExperimentalTime::class)
-class UserDao: UserRepository<User, Long> {
+class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, Long> {
 
-    override fun findAll(): List<User> {
-        var users: List<User> = emptyList()
-        transaction {
-            users = UserTable.selectAll().map {
-                User(
-                    id = it[UserTable.id],
-                    firstName = it[UserTable.firstName],
-                    lastName = it[UserTable.lastName],
-                    username = it[UserTable.username],
-                    address = it[UserTable.address],
-                    role = it[UserTable.role],
-                    phone = it[UserTable.phone],
-                    password = it[UserTable.password],
-                    email = it[UserTable.email],
-                    rating = it[UserTable.rating],
-                    createdAt = it[UserTable.createdAt],
-                    birthDate = it[UserTable.birthDate],
-                    driverLicenseNumber = it[UserTable.driverLicenseNumber]
-                )
-            }
-        }
-
-        return users
-    }
-
-    override fun findById(id: Long): User? {
-        val users = findAll()
-        return users.find { it.id == id }
-    }
-
-    override fun create(item: User) {
-        // Check if user already exists
-        findById(item.id)?.id ?.let {
-            throw Exception("User ${item.firstName} ${item.lastName} already exists")
-        }
-
-        transaction {
-            UserTable.insert {
-                it[id] = item.id
-                it[firstName] = item.firstName
-                it[lastName] = item.lastName
-                it[username] = item.username
-                it[address] = item.address
-                it[role] = item.role
-                it[phone] = item.phone
-                it[password] = item.password
-                it[email] = item.email
-                it[rating] = item.rating
-                it[createdAt] = item.createdAt
-                it[birthDate] = item.birthDate
-                it[driverLicenseNumber] = item.driverLicenseNumber
-            }
-        }
-    }
-
-    override fun update(item: User) {
-        val userId = findById(item.id) ?: throw Exception("User not found")
-
-        transaction {
-            UserTable.update({ UserTable.id eq userId.id }) {
-                it[firstName] = item.firstName.ifEmpty { userId.firstName }
-                it[lastName] = item.lastName.ifEmpty { userId.lastName }
-                it[username] = item.username.ifEmpty { userId.username }
-                it[address] = item.address.ifEmpty { userId.address }
-                it[role] = if (item.role == Role.DEFAULT) userId.role else item.role
-                it[phone] = item.phone.ifEmpty { userId.phone }
-                it[password] = item.password.ifEmpty { userId.password }
-                it[email] = item.email.ifEmpty { userId.email }
-                it[rating] = if (item.rating == 0.0f) userId.rating else item.rating
-                it[createdAt] = item.createdAt ?: userId.createdAt
-                it[birthDate] = item.birthDate ?: userId.birthDate
-                it[driverLicenseNumber] = item.driverLicenseNumber.ifEmpty { userId.driverLicenseNumber }
-            }
-        }
-    }
-
-    override fun delete(id: Long) {
-        val userId = findById(id)?.id ?: throw Exception("User not found")
-
-        var deleteUser = 0
-        transaction {
-            deleteUser = UserTable.deleteWhere { UserTable.id eq userId }
-        }
-
-        if (deleteUser == 0) {
-            throw Exception("Failed to delete user")
-        }
-    }
-
+    // Delete a user by username
     override fun deleteByUsername(username: String) {
         val users = findAll()
         val userId = users.find { it.username == username }?.id ?: throw Exception("User not found")
         delete(userId)
     }
 
+    // Find a user by username
     override fun findByUsername(username: String): User? {
         val users = findAll()
         return users.find { it.username == username }
     }
 
+    // Check if the password is correct
     override fun checkPassword(password: Password): Boolean {
         val hash = password.hash
         val plainText = password.plainText ?: return false
         return BCrypt.checkpw(plainText, hash)
     }
 
+    // Hash a password for secure storage
     override fun hashPassword(password: String): String {
         val salt = BCrypt.gensalt()
         return BCrypt.hashpw(password, salt)
+    }
+
+    // Map all the database columns to the Vehicle data class
+    override fun getEntity(row: ResultRow): User {
+        return User(
+            id = row[UserTable.id],
+            firstName = row[UserTable.firstName],
+            lastName = row[UserTable.lastName],
+            username = row[UserTable.username],
+            address = row[UserTable.address],
+            role = row[UserTable.role],
+            phone = row[UserTable.phone],
+            password = row[UserTable.password],
+            email = row[UserTable.email],
+            rating = row[UserTable.rating],
+            createdAt = row[UserTable.createdAt],
+            birthDate = row[UserTable.birthDate],
+            driverLicenseNumber = row[UserTable.driverLicenseNumber]
+        )
+    }
+
+    // Prepare a statement to create or update an entity in the database
+    override fun createEntity(entity: User, statement: UpdateBuilder<Int>) {
+        statement[UserTable.id] = entity.id
+        statement[UserTable.firstName] = entity.firstName
+        statement[UserTable.lastName] = entity.lastName
+        statement[UserTable.username] = entity.username
+        statement[UserTable.address] = entity.address
+        statement[UserTable.role] = entity.role
+        statement[UserTable.phone] = entity.phone
+        statement[UserTable.password] = entity.password
+        statement[UserTable.email] = entity.email
+        statement[UserTable.rating] = entity.rating
+        statement[UserTable.createdAt] = entity.createdAt
+        statement[UserTable.birthDate] = entity.birthDate
+        statement[UserTable.driverLicenseNumber] = entity.driverLicenseNumber
     }
 
 }
