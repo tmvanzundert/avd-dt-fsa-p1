@@ -11,7 +11,7 @@ interface VehicleRepository: CrudRepository<Vehicle, Long> {
     fun isAvailable(vehicleId: Long): Boolean
     fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int = 15): Double
     fun consumptionExpenses(vehicleId: Long): Double
-    fun calculateYearlyKilometers(vehicleId: Long): Double
+    fun calculateYearlyKilometers(vehicleId: Long)
 }
 
 class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRepository {
@@ -32,20 +32,36 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         return depreciation + maintenance + insurance + tax + energyCost
     }
 
-    // Calculate how much the vehicle consumes in expenses per kilometer
     override fun consumptionExpenses(vehicleId: Long): Double {
+        TODO("Not yet implemented")
+    }
+
+    override fun calculateYearlyKilometers(vehicleId: Long) {
+        TODO("Not yet implemented")
+    }
+
+    // Calculate how much the vehicle consumes in expenses per kilometer
+    /*override fun consumptionExpenses(vehicleId: Long): Double {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
-        return (vehicle.endOdometer - vehicle.beginOdometer) / vehicle.price
+
+        val rentalContracts: RentalContract = RentalContract().findAll()
+        val rentalContract: RentalContract = rentalContracts.find{ rentalContracts.reservationId == vehicle.id } ?: throw Exception("Rental contract not found")
+
+        val ratePlans: RatePlan = RatePlan().findAll()
+        val ratePlan: RatePlan = ratePlans.find{ ratePlans.reservationId == rentalContract.id } ?: throw Exception("Rate plan not found")
+
+        return (rentalContract.endOdometer - rentalContract.beginOdometer) / ratePlan.pricePerKm
     }
 
     // Calculate how many kilometers the vehicle has driven in a year
-    override fun calculateYearlyKilometers(vehicleId: Long): Double {
+    override fun calculateYearlyKilometers(vehicleId: Long) {
         val vehicle: Vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
+        val rentalContracts: RentalContract = RentalContract().findAll()
+        val rentalContract: RentalContract = rentalContracts.find{ rentalContracts.reservationId == vehicle.id } ?: throw Exception("Rental contract not found")
 
-        vehicle.totalYearlyUsageKilometers = vehicle.endOdometer - vehicle.beginOdometer
-        update(vehicle)
-        return vehicle.totalYearlyUsageKilometers
-    }
+        val yearlyUsage: Long = rentalContract.endOdometer - rentalContract.beginOdometer
+        updateProperty(vehicle.id, "totalYearlyUsageKilometers", yearlyUsage)
+    }*/
 
     // Map all the database columns to the Vehicle data class
     override fun getEntity(row: ResultRow): Vehicle {
@@ -57,15 +73,10 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
             category = row[VehicleTable.category],
             seats = row[VehicleTable.seats],
             range = row[VehicleTable.range],
-            beginOdometer = row[VehicleTable.beginOdometer],
-            endOdometer = row[VehicleTable.endOdometer],
             licensePlate = row[VehicleTable.licensePlate],
-            status = row[VehicleTable.status],
             location = row[VehicleTable.location],
-            price = row[VehicleTable.price],
+            ownerId = row[VehicleTable.ownerId],
             photoPath = row[VehicleTable.photoPath],
-            beginReservation = row[VehicleTable.beginReservation],
-            endReservation = row[VehicleTable.endReservation],
             totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers]
         )
     }
@@ -79,15 +90,10 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         statement[VehicleTable.category] = entity.category
         statement[VehicleTable.seats] = entity.seats
         statement[VehicleTable.range] = entity.range
-        statement[VehicleTable.beginOdometer] = entity.beginOdometer
-        statement[VehicleTable.endOdometer] = entity.endOdometer
         statement[VehicleTable.licensePlate] = entity.licensePlate
-        statement[VehicleTable.status] = entity.status
         statement[VehicleTable.location] = entity.location
-        statement[VehicleTable.price] = entity.price
+        statement[VehicleTable.ownerId] = entity.ownerId
         statement[VehicleTable.photoPath] = entity.photoPath
-        statement[VehicleTable.beginReservation] = entity.beginReservation
-        statement[VehicleTable.endReservation] = entity.endReservation
         statement[VehicleTable.totalYearlyUsageKilometers] = entity.totalYearlyUsageKilometers
     }
 

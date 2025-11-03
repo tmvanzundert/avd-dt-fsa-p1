@@ -7,10 +7,10 @@ import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.datetime.datetime
 
 // Imports all the columns from the database and store in a usable object
-object UserTable: Table("User") {
+object UserTable: Table("users") {
     val id: Column<Long> = long("id").autoIncrement()
-    val firstName: Column<String> = varchar("firstName", 255)
-    val lastName: Column<String> = varchar("lastName", 255)
+    val firstName: Column<String> = varchar("first_name", 255)
+    val lastName: Column<String> = varchar("last_name", 255)
     val username: Column<String> = varchar("username", 50).uniqueIndex()
     val address: Column<String> = varchar("address", 255)
     val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.DEFAULT)
@@ -18,9 +18,9 @@ object UserTable: Table("User") {
     val password: Column<String> = varchar("password", 255)
     val email: Column<String> = varchar("email", 255)
     val rating: Column<Float?> = float("rating").nullable()
-    val createdAt: Column<LocalDateTime?> = datetime("createdAt").nullable()
-    val birthDate: Column<LocalDateTime?> = datetime("birthDate").nullable()
-    val driverLicenseNumber: Column<String> = varchar("driverLicenseNumber", 50)
+    val createdAt: Column<LocalDateTime?> = datetime("created_at").nullable()
+    val birthDate: Column<LocalDateTime?> = datetime("birth_date").nullable()
+    val driverLicenseNumber: Column<String> = varchar("driver_license_number", 50)
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }

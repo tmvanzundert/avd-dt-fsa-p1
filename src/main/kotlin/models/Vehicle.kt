@@ -7,24 +7,19 @@ import kotlin.time.ExperimentalTime
 import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.datetime.*
 
-object VehicleTable: Table("Vehicle") {
+object VehicleTable: Table("vehicles") {
     val id: Column<Long> = long("id")/*.autoIncrement()*/
     val make: Column<String> = varchar("make", 50)
     val model: Column<String> = varchar("model", 50)
     val year: Column<Int> = integer("year")
     val category: Column<String> = varchar("category", 50)
     val seats: Column<Int> = integer("seats")
-    val range: Column<Double> = double("range")
-    val beginOdometer: Column<Double> = double("beginOdometer")
-    val endOdometer: Column<Double> = double("endOdometer")
-    val licensePlate: Column<String> = varchar("licensePlate", 20)
-    val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.NULL)
-    val location: Column<String> = varchar("location", 100)
-    val price: Column<Double> = double("price")
-    val photoPath: Column<String> = text("photoPath").clientDefault { "[]" }
-    val beginReservation: Column<LocalDateTime?> = datetime("beginReservation").nullable()
-    val endReservation: Column<LocalDateTime?> = datetime("endReservation").nullable()
-    val totalYearlyUsageKilometers: Column<Double> = double("totalYearlyUsageKilometers")
+    val range: Column<Double> = double("range_km")
+    val licensePlate: Column<String> = varchar("license_plate", 20)
+    val location: Column<Long> = long("location_id")
+    val ownerId: Column<Long> = long("owner_user_id")
+    val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
+    val totalYearlyUsageKilometers: Column<Long> = long("total_yearly_kilometers")
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -38,16 +33,12 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val category: String,
     val seats: Int,
     val range: Double,
-    val beginOdometer: Double,
-    val endOdometer: Double,
     val licensePlate: String,
     val status: VehicleStatus = VehicleStatus.NULL,
-    val location: String,
-    val price: Double,
+    val location: Long,
+    val ownerId: Long,
     val photoPath: String = "[]",
-    val beginReservation: LocalDateTime?,
-    val endReservation: LocalDateTime?,
-    var totalYearlyUsageKilometers: Double
+    val totalYearlyUsageKilometers: Long
 )
 
 @Serializable

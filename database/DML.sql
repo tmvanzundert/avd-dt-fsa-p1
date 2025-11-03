@@ -36,12 +36,14 @@ INSERT INTO vehicles (
     range_km,
     license_plate,
     location_id,
-    owner_user_id
+    owner_user_id,
+    photo_path,
+    total_yearly_kilometers
 )
 VALUES
-('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1),
-('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2),
-('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3);
+('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456),
+('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456),
+('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456);
 
 -- Insert a rate plan
 INSERT INTO rate_plans (name, price_per_day, price_per_km, deposit, cancellation_policy)
