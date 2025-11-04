@@ -69,9 +69,9 @@ CREATE TABLE IF NOT EXISTS rental_contracts (
     vehicle_id BIGINT UNIQUE,
     pickup_odometer INT,
     dropoff_odometer INT,
-    pickup_time TIMESTAMP,
-    return_time TIMESTAMP,
-    signed_at TIMESTAMP,
+    pickup_time DATETIME,
+    return_time DATETIME,
+    signed_at DATETIME,
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS rate_plans (
     rental_contract_id BIGINT,
     name VARCHAR(120) UNIQUE,
     price_per_day DECIMAL(10,2),
-    price_per_km DECIMAL(10,3),
+    price_per_km DECIMAL(10,2),
     deposit DECIMAL(10,2),
     cancellation_policy TEXT,
     FOREIGN KEY (rental_contract_id) REFERENCES rental_contracts(id)/* ON DELETE SET NULL ON UPDATE CASCADE*/

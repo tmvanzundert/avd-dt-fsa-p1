@@ -4,11 +4,9 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import kotlinx.serialization.Serializable
 import kotlin.time.ExperimentalTime
-import kotlinx.datetime.LocalDateTime
-import org.jetbrains.exposed.v1.datetime.*
 
 object VehicleTable: Table("vehicles") {
-    val id: Column<Long> = long("id")/*.autoIncrement()*/
+    val id: Column<Long> = long("id").autoIncrement()
     val make: Column<String> = varchar("make", 50)
     val model: Column<String> = varchar("model", 50)
     val year: Column<Int> = integer("year")

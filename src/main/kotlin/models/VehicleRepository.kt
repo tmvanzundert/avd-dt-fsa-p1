@@ -32,36 +32,28 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         return depreciation + maintenance + insurance + tax + energyCost
     }
 
-    override fun consumptionExpenses(vehicleId: Long): Double {
-        TODO("Not yet implemented")
-    }
-
-    override fun calculateYearlyKilometers(vehicleId: Long) {
-        TODO("Not yet implemented")
-    }
-
     // Calculate how much the vehicle consumes in expenses per kilometer
-    /*override fun consumptionExpenses(vehicleId: Long): Double {
+    override fun consumptionExpenses(vehicleId: Long): Double {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
 
-        val rentalContracts: RentalContract = RentalContract().findAll()
-        val rentalContract: RentalContract = rentalContracts.find{ rentalContracts.reservationId == vehicle.id } ?: throw Exception("Rental contract not found")
+        val rentalContracts: List<RentalContract> = RentalContractDao().findAll()
+        val rentalContract: RentalContract = rentalContracts.find{ it.vehicleId == vehicle.id } ?: throw Exception("Rental contract not found")
 
-        val ratePlans: RatePlan = RatePlan().findAll()
-        val ratePlan: RatePlan = ratePlans.find{ ratePlans.reservationId == rentalContract.id } ?: throw Exception("Rate plan not found")
+        val ratePlans: List<RatePlan> = RatePlanDao().findAll()
+        val ratePlan: RatePlan = ratePlans.find{ it.rentalContractId == rentalContract.id } ?: throw Exception("Rate plan not found")
 
-        return (rentalContract.endOdometer - rentalContract.beginOdometer) / ratePlan.pricePerKm
+        return (rentalContract.dropoffOdometer - rentalContract.pickupOdometer) / ratePlan.pricePerKm
     }
 
     // Calculate how many kilometers the vehicle has driven in a year
     override fun calculateYearlyKilometers(vehicleId: Long) {
         val vehicle: Vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
-        val rentalContracts: RentalContract = RentalContract().findAll()
-        val rentalContract: RentalContract = rentalContracts.find{ rentalContracts.reservationId == vehicle.id } ?: throw Exception("Rental contract not found")
+        val rentalContracts: List<RentalContract> = RentalContractDao().findAll()
+        val rentalContract: RentalContract = rentalContracts.find{ it.vehicleId == vehicle.id } ?: throw Exception("Rental contract not found")
 
-        val yearlyUsage: Long = rentalContract.endOdometer - rentalContract.beginOdometer
+        val yearlyUsage: Long = rentalContract.dropoffOdometer - rentalContract.pickupOdometer
         updateProperty(vehicle.id, "totalYearlyUsageKilometers", yearlyUsage)
-    }*/
+    }
 
     // Map all the database columns to the Vehicle data class
     override fun getEntity(row: ResultRow): Vehicle {
