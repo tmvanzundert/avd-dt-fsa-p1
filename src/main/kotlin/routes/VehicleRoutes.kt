@@ -2,13 +2,25 @@ package com.example.routes
 
 import com.example.models.Vehicle
 import com.example.models.VehicleDao
-import io.ktor.http.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.server.routing.Route
+import kotlin.reflect.KClass
+
+class VehicleRoute(entityClass: KClass<Vehicle>, override val dao: VehicleDao) : ModelRoute<VehicleDao, Vehicle>("vehicle", entityClass) {
+
+}
 
 fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
-    // List all vehicles
+    val vehicleRoute = VehicleRoute(Vehicle::class, vehicleDao)
+
+    vehicleRoute.apply {
+        list()
+        getById()
+        create()
+        update()
+        delete()
+    }
+
+    /*// List all vehicles
     get("/vehicles") {
         call.respond(vehicleDao.findAll())
     }
@@ -72,5 +84,5 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         } catch (e: Exception) {
             call.respond(HttpStatusCode.NotFound, e.message ?: "Vehicle not found")
         }
-    }
+    }*/
 }
