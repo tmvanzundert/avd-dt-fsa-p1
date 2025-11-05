@@ -45,13 +45,23 @@ VALUES
 ('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456),
 ('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456);
 
+INSERT INTO  rental_contracts (
+    vehicle_id,
+    pickup_odometer,
+    dropoff_odometer,
+    pickup_time,
+    return_time,
+    signed_at
+)
+VALUES (1, 123456, 123459, '2025-11-02 10:00:00', '2025-11-04 10:00:00', '2025-11-01 10:00:00');
+
 -- Insert a rate plan
-INSERT INTO rate_plans (name, price_per_day, price_per_km, deposit, cancellation_policy)
-VALUES ('Standaard Plan', 100.00, 0.50, 500.00, 'Volledige restitutie tot 24 uur voor aanvang');
+INSERT INTO rate_plans (rental_contract_id, name, price_per_day, price_per_km, deposit, cancellation_policy)
+VALUES (1, 'Standaard Plan', 100.00, 0.50, 500.00, 'Volledige restitutie tot 24 uur voor aanvang');
 
 -- Insert a reservation (user 1 reserves vehicle 2, staff is user 2, pickup and dropoff at Breda Centrum)
 INSERT INTO reservations (
     user_id, vehicle_id, rate_plan_id, staff_id, start_at, end_at, status, total_amount, pickup_location_id, dropoff_location_id
 ) VALUES (
-    1, 2, 1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, 2, 2
+    1, 1, 1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, 2, 2
 );
