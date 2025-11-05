@@ -2,10 +2,7 @@ package com.example.models
 
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
-import org.jetbrains.exposed.v1.core.statements.InsertStatement
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
-import org.jetbrains.exposed.v1.core.statements.UpdateStatement
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 interface VehicleRepository: CrudRepository<Vehicle, Long> {
     fun isAvailable(vehicleId: Long): Boolean
@@ -71,10 +68,10 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
             range = row[VehicleTable.range],
             licensePlate = row[VehicleTable.licensePlate],
             location = row[VehicleTable.location],
-            ownerId = row[VehicleTable.ownerId],
             photoPath = row[VehicleTable.photoPath],
             totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers],
-            tco = row[VehicleTable.tco]
+            ownerId = row[VehicleTable.ownerId],
+            tco = row[VehicleTable.tco],
         )
     }
 

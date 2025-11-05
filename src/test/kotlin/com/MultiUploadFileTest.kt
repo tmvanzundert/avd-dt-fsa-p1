@@ -41,7 +41,7 @@ class MultiUploadFileTest {
         lastName = "Cina",
         username = "jcina",
         address = "123 Main St",
-        role = Role.USER,
+        role = Role.CUSTOMER,
         phone = "123-456-7890",
         password = userDao.hashPassword("test123"),
         email = "",

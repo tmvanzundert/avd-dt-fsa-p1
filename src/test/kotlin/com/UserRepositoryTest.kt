@@ -1,37 +1,31 @@
 package com
 
-import com.example.JWTConfig
-import com.example.configureDatabase
-import com.example.configureJWTAuthentication
-import com.example.configureRouting
-import com.example.configureSerialization
-import com.example.configureStatusPages
-import com.example.models.Password
-import com.example.models.Role
-import com.example.models.User
-import com.example.models.UserDao
+import com.example.*
+import com.example.models.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.bodyAsText
-import io.ktor.http.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import io.ktor.server.application.Application
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
+import io.ktor.server.testing.*
 import kotlin.test.*
 
 class UserRepositoryTest {
 
     private val userDao = UserDao()
-    private val user = User(
-        id = 1L,
+    private var user = User(
         firstName = "John",
         lastName = "Cina",
         username = "jcina",
         address = "123 Main St",
-        role = Role.USER,
+        role = Role.CUSTOMER,
         phone = "123-456-7890",
         password = userDao.hashPassword("test123"),
-        email = "",
-        driverLicenseNumber = "D1234567"
+        driverLicenseNumber = "D1234567",
+        email = "jcina@hotmail.com",
+        rating = 0.0f,
+        birthDate = null
     )
 
     private val jwtConfig = JWTConfig(
@@ -57,22 +51,25 @@ class UserRepositoryTest {
         block()
     }
 
+    private fun resolveByUsername(username: String): User? =
+        userDao.findAll().firstOrNull { it.username == username }
+
     // Sign up the user and then seed full profile fields via update
     private suspend fun ApplicationTestBuilder.signupAndSeedUser(u: User) {
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
-            setBody("""{"username":"${u.username}","password":"test123"}""")
+            setBody("""{"username":"${user.username}","password":"test123"}""")
         }
         assertEquals(HttpStatusCode.OK, response.status, "Signup should succeed; body: ${response.bodyAsText()}")
-        // Enrich the just-created user with full details
-        // Note: update uses DAO transaction internally
-        try {
-            userDao.update(u)
-        } catch (_: Throwable) {
-            // If update fails because record not found (e.g., different id), try create
-            runCatching { userDao.create(u) }
-        }
+
+        val created = resolveByUsername(user.username)
+            ?: error ("User '${user.username}' should exist after signup")
+
+        val seeded = user.copy(id = created.id, password = created.password)
+        userDao.update(seeded)
+
+        user = seeded
     }
 
     @BeforeTest
@@ -81,19 +78,22 @@ class UserRepositoryTest {
     @AfterTest
     fun cleanup() = withConfiguredApp {
         runCatching { userDao.deleteByUsername(user.username) }
-        runCatching { userDao.delete(1) }
+        runCatching { if (user.id != 0L) userDao.delete(user.id) }
     }
 
     @Test
+    fun testLoginUser() = withConfiguredApp { signupAndSeedUser(user) }
+
+    @Test
     fun testCreateUser() = withConfiguredApp {
-        val found = userDao.findById(1)
+        val found = userDao.findById(user.id)
         assertNotNull(found)
         assertEquals("John Cina", "${found.firstName} ${found.lastName}")
     }
 
     @Test
     fun testFindById() = withConfiguredApp {
-        val found = userDao.findById(1)
+        val found = userDao.findById(user.id)
         assertNotNull(found)
         assertEquals("John Cina", "${found.firstName} ${found.lastName}")
     }

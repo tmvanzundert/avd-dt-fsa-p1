@@ -4,7 +4,6 @@ import io.ktor.server.application.*
 import io.ktor.server.response.*
 import com.example.models.*
 import com.example.routes.*
-import io.ktor.http.HttpStatusCode
 import io.ktor.server.auth.authenticate
 import io.ktor.server.request.receive
 import io.ktor.server.routing.*
@@ -52,11 +51,15 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
                 lastName = "",
                 username = username,
                 address = "",
-                role = Role.USER,
+                role = Role.CUSTOMER,
                 phone = "",
                 password = UserDao().hashPassword(password),
                 email = "",
-                driverLicenseNumber = ""
+                driverLicenseNumber = "",
+                id = 0L,
+                rating = 0.0f,
+                birthDate = null,
+                createdAt = null
             )
 
             // Create the user with the data from the request

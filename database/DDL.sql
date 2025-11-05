@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     rating REAL,
     phone VARCHAR(32),
-    role ENUM('ADMIN', 'CUSTOMER', 'DEFAULT') DEFAULT 'DEFAULT',
+    role ENUM('ADMIN', 'CUSTOMER') DEFAULT 'CUSTOMER',
     created_at TIMESTAMP,
     birth_date DATE,
     driver_license_number VARCHAR(64),
