@@ -29,7 +29,11 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         val depreciation = purchasePrice / depreciateInYears
         val energyCost = vehicle.totalYearlyUsageKilometers / 100 * energyConsumption * energyPrice
 
-        return depreciation + maintenance + insurance + tax + energyCost
+        val cost = depreciation + maintenance + insurance + tax + energyCost
+
+        updateProperty(vehicleId, "tco", cost)
+
+        return cost
     }
 
     // Calculate how much the vehicle consumes in expenses per kilometer
@@ -69,7 +73,8 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
             location = row[VehicleTable.location],
             ownerId = row[VehicleTable.ownerId],
             photoPath = row[VehicleTable.photoPath],
-            totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers]
+            totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers],
+            tco = row[VehicleTable.tco]
         )
     }
 
@@ -87,6 +92,7 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         statement[VehicleTable.ownerId] = entity.ownerId
         statement[VehicleTable.photoPath] = entity.photoPath
         statement[VehicleTable.totalYearlyUsageKilometers] = entity.totalYearlyUsageKilometers
+        statement[VehicleTable.tco] = entity.tco
     }
 
 }

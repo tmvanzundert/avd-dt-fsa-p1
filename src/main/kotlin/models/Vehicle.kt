@@ -3,6 +3,7 @@ package com.example.models
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 import kotlin.time.ExperimentalTime
 
 object VehicleTable: Table("vehicles") {
@@ -18,6 +19,7 @@ object VehicleTable: Table("vehicles") {
     val ownerId: Column<Long> = long("owner_user_id")
     val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
     val totalYearlyUsageKilometers: Column<Long> = long("total_yearly_kilometers")
+    val tco: Column<Double> = double("tco")
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -36,7 +38,8 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val location: Long,
     val ownerId: Long,
     val photoPath: String = "[]",
-    val totalYearlyUsageKilometers: Long
+    val totalYearlyUsageKilometers: Long,
+    val tco: Double
 )
 
 @Serializable

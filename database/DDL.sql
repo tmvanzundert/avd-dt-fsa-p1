@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS vehicles (
     owner_user_id BIGINT,
     photo_path VARCHAR(255),
     total_yearly_kilometers BIGINT,
+    tco DECIMAL(10, 2),
     FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
