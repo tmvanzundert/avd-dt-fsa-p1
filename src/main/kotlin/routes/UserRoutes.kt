@@ -15,9 +15,16 @@ class UserRoute(entityClass: KClass<User>, override val dao: UserDao) : ModelRou
 
 
 
-fun userRoutes(userDao: UserDao) {
-    val user: KClass<User> = User::class
-    UserRoute(user, userDao)
+fun Route.userRoutes(userDao: UserDao) {
+    val userRoute = UserRoute(User::class, userDao)
+
+    userRoute.apply {
+        list()
+        getById()
+        create()
+        update()
+        delete()
+    }
 
     // List all users
     /*get("/users") {
