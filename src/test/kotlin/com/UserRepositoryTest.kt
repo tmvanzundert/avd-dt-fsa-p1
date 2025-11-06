@@ -1,113 +1,103 @@
 package com
 
 import com.example.*
-import com.example.jwtConfig
 import com.example.models.*
 import io.ktor.client.request.*
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
-import io.ktor.http.headers
 import io.ktor.server.application.Application
 import io.ktor.server.testing.*
-import io.netty.handler.codec.http.HttpHeaders.setHeader
 import kotlin.test.*
-import kotlinx.serialization.Serializable
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.serialization.*
 
 class UserRepositoryTest {
 
-    val user = User(
-        id = 1L,
+    private val userDao = UserDao()
+    private var user = User(
         firstName = "John",
         lastName = "Cina",
         username = "jcina",
         address = "123 Main St",
-        role = Role.USER,
-        phone = "123-456-7890",
-        password = UserDao().hashPassword("test123"),
-        email = "",
-        driverLicenseNumber = "D1234567"
+        password = "test123",
+        email = "jcina@hotmail.com",
     )
 
-    val jwtConfig = this.jwtConfig()
-    @BeforeTest
-    fun testGetUsersEndpoint() = testApplication {
-        application {
-            configureSerialization()
-            configureJWTAuthentication(jwtConfig)
-            configureRouting(jwtConfig)
-            configureStatusPages()
-            configureDatabase()
-        }
+    private val jwtConfig = JWTConfig(
+        secret = "secret",
+        issuer = "http://127.0.0.1:8085",
+        audience = "http://127.0.0.1:8085",
+        realm = "Access protected routes",
+        tokenExpiry = 86400000
+    )
 
-        val jsonBody = """
-            {
-                "username": "${user.username}",
-                "password": "test123"
-            }
-        """.trimIndent()
+    // Install all app modules once per test run
+    private fun Application.installApp() {
+        configureSerialization()
+        configureJWTAuthentication(jwtConfig)
+        configureRouting(jwtConfig)
+        configureStatusPages()
+        configureDatabase()
+    }
+
+    // Start configured app and run provided block with a client
+    private fun withConfiguredApp(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
+        application { installApp() }
+        block()
+    }
+
+    // Sign up the user and then seed full profile fields via update
+    private suspend fun ApplicationTestBuilder.signupAndSeedUser(u: User) {
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
-            setBody(jsonBody)
+            setBody("""{"username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"}""")
         }
-        assertEquals(HttpStatusCode.OK, response.status)
 
-        UserDao().update(user)
+        assertEquals(HttpStatusCode.OK, response.status, "Signup should succeed; body: ${response.bodyAsText()}")
+
+        val created = userDao.findByUsername(user.username)
+            ?: error ("User '${user.username}' should exist after signup")
+
+        val seeded = user.copy(id = created.id, password = created.password)
+        user = seeded
+    }
+
+    @BeforeTest
+    fun setup() = withConfiguredApp { signupAndSeedUser(user) }
+
+    @AfterTest
+    fun cleanup() = withConfiguredApp {
+        runCatching { userDao.deleteByUsername(user.username) }
+        runCatching { if (user.id != 0L) userDao.delete(user.id) }
     }
 
     @Test
-    fun testCreateUser() {
-        val found = UserDao().findById(1)
+    fun testLoginUser() = withConfiguredApp { signupAndSeedUser(user) }
+
+    @Test
+    fun testCreateUser() = withConfiguredApp {
+        val found = userDao.findById(user.id)
         assertNotNull(found)
         assertEquals("John Cina", "${found.firstName} ${found.lastName}")
-        UserDao().delete(1)
     }
 
     @Test
-    fun testFindById() {
-        val found = UserDao().findById(1)
+    fun testFindById() = withConfiguredApp {
+        val found = userDao.findById(user.id)
         assertNotNull(found)
         assertEquals("John Cina", "${found.firstName} ${found.lastName}")
-        UserDao().delete(1)
     }
 
     @Test
-    fun testFindAll() {
-        val allUsers = UserDao().findAll()
+    fun testFindAll() = withConfiguredApp {
+        val allUsers = userDao.findAll()
         assertTrue(allUsers.any { "${it.firstName} ${it.lastName}" == "John Cina" })
-        UserDao().delete(1)
     }
 
     @Test
-    fun testPasswordUser() {
-        val password = Password(
-            hash = user.password,
-            plainText = "test123"
-        )
-
-        val isPasswordValid = UserDao().checkPassword(password)
-        assertTrue(isPasswordValid)
-        UserDao().delete(1)
-    }
-
-    @Test
-    fun testDeleteUser() {
-        UserDao().delete(1)
-        val found = UserDao().findById(1)
-        assertNull(found)
-    }
-
-    fun jwtConfig(): JWTConfig {
-        return JWTConfig(
-            secret = "secret",
-            issuer = "http://127.0.0.1:8085",
-            audience = "http://127.0.0.1:8085",
-            realm = "Access protected routes",
-            tokenExpiry = 86400000
-        )
+    fun testPasswordUser() = withConfiguredApp {
+        val password = Password(hash = user.password, plainText = "test123")
+        assertTrue(userDao.checkPassword(password))
     }
 }

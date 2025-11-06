@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(255) NOT NULL UNIQUE,
     rating REAL,
     phone VARCHAR(32),
-    role ENUM('ADMIN', 'CUSTOMER', 'DEFAULT') DEFAULT 'DEFAULT',
+    role ENUM('ADMIN', 'CUSTOMER') DEFAULT 'CUSTOMER',
     created_at TIMESTAMP,
     birth_date DATE,
     driver_license_number VARCHAR(64),
@@ -58,17 +58,33 @@ CREATE TABLE IF NOT EXISTS vehicles (
     license_plate VARCHAR(32) UNIQUE NOT NULL,
     location_id BIGINT,
     owner_user_id BIGINT,
+    photo_path VARCHAR(255),
+    total_yearly_kilometers BIGINT,
+    tco DECIMAL(10, 2),
     FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS rental_contracts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    vehicle_id BIGINT UNIQUE,
+    pickup_odometer INT,
+    dropoff_odometer INT,
+    pickup_time DATETIME,
+    return_time DATETIME,
+    signed_at DATETIME,
+    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE ON UPDATE CASCADE
+);
+
 CREATE TABLE IF NOT EXISTS rate_plans (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    rental_contract_id BIGINT,
     name VARCHAR(120) UNIQUE,
     price_per_day DECIMAL(10,2),
-    price_per_km DECIMAL(10,3),
+    price_per_km DECIMAL(10,2),
     deposit DECIMAL(10,2),
-    cancellation_policy TEXT
+    cancellation_policy TEXT,
+    FOREIGN KEY (rental_contract_id) REFERENCES rental_contracts(id)/* ON DELETE SET NULL ON UPDATE CASCADE*/
 );
 
 CREATE TABLE IF NOT EXISTS reservations (
@@ -89,17 +105,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     FOREIGN KEY (staff_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (pickup_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (dropoff_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE
-);
-
-CREATE TABLE IF NOT EXISTS rental_contracts (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    reservation_id BIGINT UNIQUE,
-    pickup_odometer INT,
-    dropoff_odometer INT,
-    pickup_time TIMESTAMP,
-    return_time TIMESTAMP,
-    signed_at TIMESTAMP,
-    FOREIGN KEY (reservation_id) REFERENCES reservations(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS payments (

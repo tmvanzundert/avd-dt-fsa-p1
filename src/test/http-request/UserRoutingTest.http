@@ -4,7 +4,11 @@ Content-Type: application/json
 
 {
   "username": "userroutingapitestuser",
-  "password": "userroutingtestpass"
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
 }
 
 ### Login and get Bearer token
@@ -19,31 +23,28 @@ Content-Type: application/json
 > {% client.global.set("bearerToken", response.body.token); %}
 
 ### Get all users
-GET http://localhost:8085/users
+GET http://localhost:8085/user
 Authorization: Bearer {{bearerToken}}
 
 ### Get user by ID
-GET http://localhost:8085/users/1
+GET http://localhost:8085/user/1
 Authorization: Bearer {{bearerToken}}
 
 ### Create user
-POST http://localhost:8085/users
+POST http://localhost:8085/user
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
 {
   "id": 5,
-  "role": "USER",
-  "phone": "123-456-7890",
-  "password": "password123",
-  "email": "john@example.com",
-  "driverLicenseNumber": "D1234567",
-  "firstName": "",
-  "lastName": "",
   "username": "test",
-  "address": ""
+  "password": "password123",
+  "firstName": "Testing",
+  "lastName": "Test",
+  "address": "Hoogstraten 14",
+  "email": "john@example.com"
 }
 
 ### Delete user
-DELETE http://localhost:8085/users/1
+DELETE http://localhost:8085/user/5
 Authorization: Bearer {{bearerToken}}

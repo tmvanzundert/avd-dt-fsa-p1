@@ -3,8 +3,12 @@ POST http://localhost:8085/signup
 Content-Type: application/json
 
 {
-  "username": "vehicleapitestuser",
-  "password": "vehicletestpass"
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
 }
 
 ### Login and get Bearer token
@@ -12,22 +16,22 @@ POST http://localhost:8085/login
 Content-Type: application/json
 
 {
-  "username": "vehicleapitestuser",
-  "password": "vehicletestpass"
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
 }
 
 > {% client.global.set("bearerToken", response.body.token); %}
 
 ### Get all vehicles
-GET http://localhost:8085/vehicles
+GET http://localhost:8085/vehicle
 Authorization: Bearer {{bearerToken}}
 
 ### Get vehicle by ID
-GET http://localhost:8085/vehicles/1
+GET http://localhost:8085/vehicle/1
 Authorization: Bearer {{bearerToken}}
 
 ### Create vehicle
-POST http://localhost:8085/vehicles
+POST http://localhost:8085/vehicle
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
@@ -39,18 +43,15 @@ Authorization: Bearer {{bearerToken}}
   "category": "Sedan",
   "seats": 5,
   "range": 600.0,
-  "beginOdometer": 0.0,
-  "endOdometer": 20000.0,
   "licensePlate": "ABC1234",
   "status": "AVAILABLE",
-  "location": "New York",
-  "price": 15000.0,
+  "location": 1,
+  "ownerId": 1,
   "photoPath": "/path/to/photo.jpg",
-  "beginReservation": "2025-10-01T10:00",
-  "endReservation": "2025-10-10T10:00",
-  "totalYearlyUsageKilometers": 12000.0
+  "totalYearlyUsageKilometers": 0,
+  "tco": 0.0
 }
 
 ### Delete vehicle
-DELETE http://localhost:8085/vehicles/5
+DELETE http://localhost:8085/vehicle/5
 Authorization: Bearer {{bearerToken}}

@@ -1,20 +1,15 @@
 package com.example.routes
 
-import com.example.models.Vehicle
-import com.example.models.VehicleDao
-import com.example.models.VehicleStatus
-import io.ktor.http.content.PartData
-import io.ktor.http.content.forEachPart
+import com.example.models.*
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.content.*
 import io.ktor.server.request.receiveMultipart
 import io.ktor.server.response.respondText
-import io.ktor.server.routing.Route
-import io.ktor.server.routing.post
+import io.ktor.server.routing.*
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.copyAndClose
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
-import java.io.File
-import java.io.IOException
+import kotlinx.serialization.json.*
+import java.io.*
 import kotlin.text.toLong
 
 fun Route.imageRoutes() {
@@ -24,7 +19,7 @@ fun Route.imageRoutes() {
         // Extract carId from the URL parameters and throw error if missing
         val carId = call.parameters["id"] ?: return@post call.respondText(
             "Missing carId",
-            status = io.ktor.http.HttpStatusCode.BadRequest
+            status = HttpStatusCode.BadRequest
         )
 
         val id = carId.toLong()
@@ -33,7 +28,7 @@ fun Route.imageRoutes() {
         if (vehicleDao.findById(id) == null) {
             return@post call.respondText(
                 "Car with id='$carId' not found",
-                status = io.ktor.http.HttpStatusCode.NotFound
+                status = HttpStatusCode.NotFound
             )
         }
 
@@ -98,30 +93,27 @@ fun Route.imageRoutes() {
         if (savedFileNames.isEmpty()) {
             return@post call.respondText(
                 "No image files were uploaded",
-                status = io.ktor.http.HttpStatusCode.BadRequest
+                status = HttpStatusCode.BadRequest
             )
         }
 
         // Serialize to JSON string and set as information that needs to be updated in the vehicle object
         val json: String = Json.encodeToJsonElement(savedFilePaths).toString()
-        val vehicle: Vehicle = Vehicle(
-            id = id,
-            make = "",
-            model = "",
-            year = 0,
-            category = "",
-            seats = 0,
-            range = 0.0,
-            beginOdometer = 0.0,
-            endOdometer = 0.0,
-            licensePlate = "",
-            status = VehicleStatus.NULL,
-            location = "",
-            price = 0.0,
-            photoPath = json,
-            beginReservation = null,
-            endReservation = null,
-            totalYearlyUsageKilometers = 0.0
+        val vehicle = Vehicle(
+            id = 1L,
+            make = "Toyota",
+            model = "Corolla",
+            year = 2020,
+            category = "Sedan",
+            seats = 5,
+            range = 600.0,
+            licensePlate = "ABC-123",
+            status = VehicleStatus.AVAILABLE,
+            location = 1,
+            totalYearlyUsageKilometers = 0,
+            ownerId = 1L,
+            photoPath = "",
+            tco = 0.0
         )
 
         // Update vehicle with new photo paths

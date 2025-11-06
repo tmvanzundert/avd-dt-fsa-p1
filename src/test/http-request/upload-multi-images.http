@@ -4,7 +4,11 @@ Content-Type: application/json
 
 {
   "username": "userroutingapitestuser",
-  "password": "userroutingtestpass"
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
 }
 
 ### Login and get Bearer token
@@ -18,30 +22,30 @@ Content-Type: application/json
 
 > {% client.global.set("bearerToken", response.body.token); %}
 
-### Create vehicle with id=1
-POST http://localhost:8085/vehicles
+### Create vehicle
+POST http://localhost:8085/vehicle
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
 {
-  "id": 1,
+  "id": 100,
   "make": "Toyota",
   "model": "Corolla",
   "year": 2020,
   "category": "Sedan",
   "seats": 5,
   "range": 600.0,
-  "beginOdometer": 0.0,
-  "endOdometer": 0.0,
-  "licensePlate": "ABC-123",
+  "licensePlate": "ABC1234",
   "status": "AVAILABLE",
-  "location": "Amsterdam",
-  "kilometerRate": 0.25,
-  "photoPath": "[]"
+  "location": 1,
+  "ownerId": 1,
+  "photoPath": "/path/to/photo.jpg",
+  "totalYearlyUsageKilometers": 0,
+  "tco": 0.0
 }
 
-### Upload multiple images for car with ID 1
-POST http://localhost:8085/upload/cars/1
+### Upload multiple images for car
+POST http://localhost:8085/upload/cars/100
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{bearerToken}}
 

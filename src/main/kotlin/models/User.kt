@@ -6,24 +6,27 @@ import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.datetime.datetime
 
-object UserTable: Table("User") {
+// Imports all the columns from the database and store in a usable object
+object UserTable: Table("users") {
     val id: Column<Long> = long("id").autoIncrement()
-    val firstName: Column<String> = varchar("firstName", 255)
-    val lastName: Column<String> = varchar("lastName", 255)
+    val firstName: Column<String> = varchar("first_name", 255)
+    val lastName: Column<String> = varchar("last_name", 255)
     val username: Column<String> = varchar("username", 50).uniqueIndex()
     val address: Column<String> = varchar("address", 255)
-    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.DEFAULT)
-    val phone: Column<String> = varchar("phone", 20)
+    val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.
+    CUSTOMER)
+    val phone: Column<String?> = varchar("phone", 20).nullable()
     val password: Column<String> = varchar("password", 255)
     val email: Column<String> = varchar("email", 255)
     val rating: Column<Float?> = float("rating").nullable()
-    val createdAt: Column<LocalDateTime?> = datetime("createdAt").nullable()
-    val birthDate: Column<LocalDateTime?> = datetime("birthDate").nullable()
-    val driverLicenseNumber: Column<String> = varchar("driverLicenseNumber", 50)
+    val createdAt: Column<LocalDateTime?> = datetime("created_at").nullable()
+    val birthDate: Column<LocalDateTime?> = datetime("birth_date").nullable()
+    val driverLicenseNumber: Column<String?> = varchar("driver_license_number", 50).nullable()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
+// User
 @Serializable
 data class User @OptIn(ExperimentalTime::class) constructor(
     val id: Long = 0L,
@@ -31,22 +34,23 @@ data class User @OptIn(ExperimentalTime::class) constructor(
     val lastName: String,
     val username: String,
     val address: String,
-    val role: Role = Role.USER,
-    val phone: String,
+    val role: Role = Role.CUSTOMER,
+    val phone: String? = null,
     val password: String,
     val email: String,
     val rating: Float? = 0.0f,
     val createdAt: LocalDateTime? = null,
     val birthDate: LocalDateTime? = null,
-    val driverLicenseNumber: String
+    val driverLicenseNumber: String? = null
 )
 
+// Allowed roles
 enum class Role {
-    USER,
-    ADMIN,
-    DEFAULT
+    CUSTOMER,
+    ADMIN
 }
 
+// Store the plaintext and hash in an object
 data class Password (
     val hash: String,
     val plainText: String?
