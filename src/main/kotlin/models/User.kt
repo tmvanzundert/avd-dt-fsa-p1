@@ -15,13 +15,13 @@ object UserTable: Table("users") {
     val address: Column<String> = varchar("address", 255)
     val role: Column<Role> = enumerationByName("role", 50, Role::class).default(Role.
     CUSTOMER)
-    val phone: Column<String> = varchar("phone", 20)
+    val phone: Column<String?> = varchar("phone", 20).nullable()
     val password: Column<String> = varchar("password", 255)
     val email: Column<String> = varchar("email", 255)
     val rating: Column<Float?> = float("rating").nullable()
     val createdAt: Column<LocalDateTime?> = datetime("created_at").nullable()
     val birthDate: Column<LocalDateTime?> = datetime("birth_date").nullable()
-    val driverLicenseNumber: Column<String> = varchar("driver_license_number", 50)
+    val driverLicenseNumber: Column<String?> = varchar("driver_license_number", 50).nullable()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -35,13 +35,13 @@ data class User @OptIn(ExperimentalTime::class) constructor(
     val username: String,
     val address: String,
     val role: Role = Role.CUSTOMER,
-    val phone: String,
+    val phone: String? = null,
     val password: String,
     val email: String,
     val rating: Float? = 0.0f,
     val createdAt: LocalDateTime? = null,
     val birthDate: LocalDateTime? = null,
-    val driverLicenseNumber: String
+    val driverLicenseNumber: String? = null
 )
 
 // Allowed roles

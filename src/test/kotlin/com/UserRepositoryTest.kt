@@ -19,13 +19,8 @@ class UserRepositoryTest {
         lastName = "Cina",
         username = "jcina",
         address = "123 Main St",
-        role = Role.CUSTOMER,
-        phone = "123-456-7890",
-        password = userDao.hashPassword("test123"),
-        driverLicenseNumber = "D1234567",
+        password = "test123",
         email = "jcina@hotmail.com",
-        rating = 0.0f,
-        birthDate = null
     )
 
     private val jwtConfig = JWTConfig(
@@ -51,24 +46,20 @@ class UserRepositoryTest {
         block()
     }
 
-    private fun resolveByUsername(username: String): User? =
-        userDao.findAll().firstOrNull { it.username == username }
-
     // Sign up the user and then seed full profile fields via update
     private suspend fun ApplicationTestBuilder.signupAndSeedUser(u: User) {
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
             accept(ContentType.Application.Json)
-            setBody("""{"username":"${user.username}","password":"test123"}""")
+            setBody("""{"username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"}""")
         }
+
         assertEquals(HttpStatusCode.OK, response.status, "Signup should succeed; body: ${response.bodyAsText()}")
 
-        val created = resolveByUsername(user.username)
+        val created = userDao.findByUsername(user.username)
             ?: error ("User '${user.username}' should exist after signup")
 
         val seeded = user.copy(id = created.id, password = created.password)
-        userDao.update(seeded)
-
         user = seeded
     }
 

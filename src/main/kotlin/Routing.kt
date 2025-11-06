@@ -10,9 +10,32 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import kotlin.reflect.full.memberProperties
 
+// Store all the required information when signing up
+@Serializable
+data class SignupRequest (
+    val firstName: String,
+    val lastName: String,
+    val username: String,
+    val address: String,
+    val email: String,
+    val password: String
+)
+
+// Easily convert the SignupRequest to a User object
+fun SignupRequest.toUser(userDao: UserDao): User {
+    return User(
+        firstName = this.firstName,
+        lastName = this.lastName,
+        username = this.username,
+        address = this.address,
+        email = this.email,
+        password = userDao.hashPassword(this.password)
+    )
+}
+
 // Store the username and password when logging in
 @Serializable
-data class AuthRequest(val username: String, val password: String)
+data class LoginRequest(val username: String, val password: String)
 
 fun Application.configureRouting(jwtConfig: JWTConfig) {
     // Create the DAO objects for use in the routing
@@ -22,45 +45,24 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
     routing {
 
         // If a user wants to sign up, create the user in the database
-        post("signup") {
-            // Receive username and password
-            val requestData = call.receive<AuthRequest>()
+        post("/signup") {
 
             // Set the User from the request and throw error if not all fields are filled in
+            var user: User
             try {
-                // val requestData: User = call.receive<User>()
+                // Receive username and password
+                val requestData: SignupRequest = call.receive<SignupRequest>()
+                user = requestData.toUser(userDao)
             }
             catch (e: Exception) {
-                val allowedProperties: MutableList<String> = User::class.memberProperties.map { it.name } as MutableList<String>
-                val propertiesToRemove = listOf("createdAt", "id", "rating", "role")
-                allowedProperties.removeAll { it in propertiesToRemove }
+                val allowedProperties: List<String> = SignupRequest::class.memberProperties.map { it.name }
                 return@post call.respondText("Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e")
             }
 
-            // Set the username and password
-            val username = requestData.username
-            val password = requestData.password
-
             // Check if username exists
-            if (userDao.findByUsername(username) != null) {
-                return@post call.respondText("Username '$username' already exists")
+            if (userDao.findByUsername(user.username) != null) {
+                return@post call.respondText("Username '${user.username}' already exists")
             }
-
-            val user = User(
-                firstName = "",
-                lastName = "",
-                username = username,
-                address = "",
-                role = Role.CUSTOMER,
-                phone = "",
-                password = UserDao().hashPassword(password),
-                email = "",
-                driverLicenseNumber = "",
-                id = 0L,
-                rating = 0.0f,
-                birthDate = null,
-                createdAt = null
-            )
 
             // Create the user with the data from the request
             try {
@@ -71,24 +73,24 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             }
 
             // Return the response that the user has been created
-            return@post call.respond(mapOf("response" to "User $username has been created"))
+            return@post call.respond(mapOf("response" to "User ${user.username} has been created"))
         }
 
-        post("login") {
+        post("/login") {
             // Receive the username and password
-            val requestData = call.receive<AuthRequest>()
+            val requestData = call.receive<LoginRequest>()
             val username = requestData.username
             val password = requestData.password
 
             // Find the user in the database and create a password object
             val findUser = userDao.findByUsername(username)
             val passwordObj = Password(
-                hash = findUser?.password ?: "",
+                hash = findUser?.password ?: return@post call.respondText("Incorrect credentials"),
                 plainText = password,
             )
 
-            // Check if username exists
-            if (findUser == null || !userDao.checkPassword(passwordObj)) {
+            // Check if the password is correct
+            if (!userDao.checkPassword(passwordObj)) {
                 return@post call.respondText("Incorrect credentials")
             }
 

@@ -2,8 +2,8 @@ POST http://localhost:8085/signup
 Content-Type: application/json
 
 {
-  "username": "uploadapitestuser",
-  "password": "uploadtestpass"
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
 }
 
 ### Login and get Bearer token
@@ -11,8 +11,8 @@ POST http://localhost:8085/login
 Content-Type: application/json
 
 {
-  "username": "uploadapitestuser",
-  "password": "uploadtestpass"
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
 }
 
 > {% client.global.set("bearerToken", response.body.token); %}
