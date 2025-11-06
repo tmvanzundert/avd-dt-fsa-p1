@@ -19,7 +19,7 @@ object VehicleTable: Table("vehicles") {
     val ownerId: Column<Long> = long("owner_user_id")
     val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
     val totalYearlyUsageKilometers: Column<Long> = long("total_yearly_kilometers")
-    val tco: Column<Double?> = double("tco") as Column<Double?>
+    val tco: Column<Double> = double("tco")
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -38,8 +38,8 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val location: Long,
     val ownerId: Long,
     val photoPath: String = "[]",
-    val totalYearlyUsageKilometers: Long,
-    val tco: Double?
+    val totalYearlyUsageKilometers: Long = 0,
+    val tco: Double = 0.0
 )
 
 @Serializable
