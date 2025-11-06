@@ -22,7 +22,7 @@ Content-Type: application/json
 > {% client.global.set("bearerToken", response.body.token); %}
 
 ### Create vehicle
-POST http://localhost:8085/vehicles
+POST http://localhost:8085/vehicle
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
@@ -34,11 +34,11 @@ Authorization: Bearer {{bearerToken}}
   "category": "Sedan",
   "seats": 5,
   "range": 600.0,
-  "licensePlate": "TEST-PLATE",
+  "licensePlate": "ABC1234",
   "status": "AVAILABLE",
   "location": 1,
   "ownerId": 1,
-  "photoPath": [],
+  "photoPath": "/path/to/photo.jpg",
   "totalYearlyUsageKilometers": 0,
   "tco": 0.0
 }
