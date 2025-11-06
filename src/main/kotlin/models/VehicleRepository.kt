@@ -58,9 +58,9 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
 
     // Map all the database columns to the Vehicle data class
     override fun getEntity(row: ResultRow): Vehicle {
-        if (UserDao().findById(row[VehicleTable.id]) == null) {
+        /*if (UserDao().findById(row[VehicleTable.id]) == null) {
             throw Exception("User id is null for vehicle ${row[VehicleTable.id]}.")
-        }
+        }*/
 
         return Vehicle(
             id = row[VehicleTable.id],
@@ -81,9 +81,9 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
 
     // Prepare a statement to create or update an entity in the database
     override fun createEntity(entity: Vehicle, statement: UpdateBuilder<Int>) {
-        if (UserDao().findById(entity.id) == null) {
+        /*if (UserDao().findById(entity.id) == null) {
             throw Exception("User with id ${entity.ownerId} does not yet exist, so cannot create a new car with id ${entity.id}.")
-        }
+        }*/
 
         statement[VehicleTable.id] = entity.id
         statement[VehicleTable.make] = entity.make
