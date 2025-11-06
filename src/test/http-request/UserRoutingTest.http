@@ -4,7 +4,11 @@ Content-Type: application/json
 
 {
   "username": "userroutingapitestuser",
-  "password": "userroutingtestpass"
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
 }
 
 ### Login and get Bearer token

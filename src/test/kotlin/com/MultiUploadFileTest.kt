@@ -35,17 +35,13 @@ class MultiUploadFileTest {
 
     // Test user and DAO
     private val userDao = UserDao()
-    private val user = User(
-        id = 1L,
+    private var user = User(
         firstName = "John",
         lastName = "Cina",
         username = "jcina",
         address = "123 Main St",
-        role = Role.CUSTOMER,
-        phone = "123-456-7890",
-        password = userDao.hashPassword("test123"),
-        email = "",
-        driverLicenseNumber = "D1234567"
+        password = "test123",
+        email = "jcina@hotmail.com",
     )
 
     // Shared JWT config for tests
@@ -79,7 +75,7 @@ class MultiUploadFileTest {
         password: String
     ): String {
         val jsonBody = """
-            {"username": "$username", "password": "$password"}
+            "username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"
         """.trimIndent()
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
