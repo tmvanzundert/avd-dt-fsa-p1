@@ -22,6 +22,7 @@ object ReservationTable: Table("Reservations") {
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
+@Serializable
 data class Reservations(
     val id: Long,
     val user_id: Long,
