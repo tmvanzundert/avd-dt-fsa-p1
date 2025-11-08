@@ -8,6 +8,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
@@ -39,19 +40,20 @@ class UC1AutoHuren : BaseApplication() {
 
     @Test
     fun `book seeded vehicle returns ok`() = withConfiguredApp {
-        //TODO book the vehicle
-        val bookingJson = """
-            {
-              "": ${vehicle.id},
-              "": "${user.username}",
-            }
-        """.trimIndent()
+        val reservationJson = """
+        {
+          "vehicleId": ${vehicle.id},
+          "userName": "${user.username}"
+        }
+    """.trimIndent()
 
-        val response = client.get("/booking") {
+        val response = client.post("/reservation") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
-            setBody(bookingJson)
+            contentType(ContentType.Application.Json)
+            setBody(reservationJson)
         }
+
         assertEquals(
             HttpStatusCode.OK,
             response.status,
@@ -63,8 +65,8 @@ class UC1AutoHuren : BaseApplication() {
     fun `Send message to renter and owner returns ok`() = withConfiguredApp {
         //TODO send notification to renter and owner
         val notificationJson = """
-            {
-            }
+        {
+        }
         """.trimIndent()
 
         val response = client.post("/notification") {
@@ -98,15 +100,17 @@ class UC1AutoHuren : BaseApplication() {
     @Test
     fun `book vehicle with invalid payment details returns bad request`() = withConfiguredApp {
         //TODO book the vehicle with invalid payment details
-        val invalidBookingJson = """
-            {
-            }
+        val invalidReservationJson = """
+        {
+          "vehicleId": ${vehicle.id},
+          "userName": "${user.username}"
+        }
         """.trimIndent()
 
-        val response = client.post("/booking") {
+        val response = client.post("/reservation") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
-            setBody(invalidBookingJson)
+            setBody(invalidReservationJson)
         }
         assertEquals(
             HttpStatusCode.BadRequest,
