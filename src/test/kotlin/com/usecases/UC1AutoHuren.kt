@@ -66,12 +66,15 @@ class UC1AutoHuren : BaseApplication() {
         //TODO send notification to renter and owner
         val notificationJson = """
         {
+          "message": "Test notification from UC1",
+          "userName": "${user.username}"
         }
-        """.trimIndent()
+    """.trimIndent()
 
         val response = client.post("/notification") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
             setBody(notificationJson)
         }
         assertEquals(
@@ -80,7 +83,6 @@ class UC1AutoHuren : BaseApplication() {
             "Notification should return OK; body: ${response.bodyAsText()}"
         )
     }
-
 
     // Bad Flows
     @Test

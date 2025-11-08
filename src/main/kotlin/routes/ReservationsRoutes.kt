@@ -8,10 +8,10 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 
-
 fun Route.reservationsRoutes(
     userDao: UserDao,
     reservationsDao: ReservationsDao,
+
 ) {
     post("/reservation") {
         val request = call.receive<CreateReservationRequest>()

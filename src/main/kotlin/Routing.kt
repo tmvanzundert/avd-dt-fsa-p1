@@ -42,6 +42,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
     val userDao = UserDao()
     val vehicleDao = VehicleDao()
     val reservationsDao = ReservationsDao()
+    val notificationDao = NotificationDao()
 
     routing {
 
@@ -106,6 +107,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             userRoutes(userDao)
             vehicleRoutes(vehicleDao)
             reservationsRoutes(userDao, reservationsDao)
+            notificationRoutes(userDao, /* notificationDao */)
         }
     }
 }
