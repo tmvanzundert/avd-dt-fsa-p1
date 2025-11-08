@@ -3,7 +3,14 @@ package com.example.models
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 
-interface ReservationsRepository : CrudRepository<Reservations, Long>
+
+interface ReservationsRepository : CrudRepository<Reservations, Long> {
+
+    fun reserveCar(reservation: Reservations)
+    fun isCarReserved(vehicleId: Long): Boolean
+    fun getCarReservationStatus(vehicleId: Long): String
+    fun makeCarReservable(vehicleId: Long)
+}
 
 class ReservationsDao :
     CrudDAO<Reservations, Long, ReservationTable>(ReservationTable),
@@ -37,5 +44,32 @@ class ReservationsDao :
         statement[ReservationTable.total_amount] = entity.total_amount
         statement[ReservationTable.pickup_location_id] = entity.pickup_location_id
         statement[ReservationTable.dropoff_location_id] = entity.dropoff_location_id
+    }
+
+    override fun reserveCar(reservation: Reservations) {
+        val vehicleDao = VehicleDao()
+        if (!vehicleDao.isAvailable(reservation.vehicle_id)) {
+            throw Exception("Vehicle ${reservation.vehicle_id} is not available for reservation")
+        }
+        create(reservation)
+        vehicleDao.updateProperty(reservation.vehicle_id, "status", VehicleStatus.RENTED)
+    }
+
+
+    override fun isCarReserved(vehicleId: Long): Boolean {
+        val vehicleDao = VehicleDao()
+        val vehicle = vehicleDao.findById(vehicleId) ?: throw Exception("Vehicle not found")
+        return vehicle.status == VehicleStatus.RENTED || vehicle.status == VehicleStatus.MAINTENANCE
+    }
+
+    override fun getCarReservationStatus(vehicleId: Long): String {
+        val vehicleDao = VehicleDao()
+        val vehicle = vehicleDao.findById(vehicleId) ?: throw Exception("Vehicle not found")
+        return vehicle.status.toString()
+    }
+
+    override fun makeCarReservable(vehicleId: Long) {
+        val vehicleDao = VehicleDao()
+        vehicleDao.updateProperty(vehicleId, "status", VehicleStatus.AVAILABLE)
     }
 }

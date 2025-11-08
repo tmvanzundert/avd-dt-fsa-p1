@@ -10,12 +10,9 @@ import kotlin.time.ExperimentalTime
 interface NotificationRepository : CrudRepository<Notification, Long> {
 
     fun getNotificationsForUser(userId: Long): List<Notification>
-
     @OptIn(ExperimentalTime::class)
     fun createNotification(userId: Long, type: String, message: String, timestamp: LocalDateTime = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.UTC), ): Notification
-
     fun markAsRead(notificationId: Long): Notification
-
     fun markAllAsReadForUser(userId: Long)
 }
 
