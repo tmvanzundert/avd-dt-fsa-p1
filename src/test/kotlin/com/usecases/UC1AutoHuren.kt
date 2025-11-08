@@ -127,7 +127,7 @@ class UC1AutoHuren : BaseApplication() {
         val cancelBookingJson = """
             {}
         """.trimIndent()
-        val response = client.post("/booking/cancel") {
+        val response = client.post("/reservation/cancel") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
             setBody(cancelBookingJson)

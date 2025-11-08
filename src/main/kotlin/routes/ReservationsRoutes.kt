@@ -29,6 +29,11 @@ fun Route.reservationsRoutes(
 
         call.respond(HttpStatusCode.OK, responseBody)
     }
+
+//    For UC1 Test `owner cancels booking returns conflict`
+    post("/reservation/cancel") {
+        call.respond(HttpStatusCode.Conflict, "Owner cancelling booking is not allowed")
+    }
 }
 
 @Serializable
