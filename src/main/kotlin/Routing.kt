@@ -105,7 +105,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             reservationsRoutes(userDao, reservationsDao)
             notificationRoutes(userDao, /* notificationDao */)
             paymentRoutes(paymentsDao)
-            locationRoutes(locationDao)
+            locationRoutes(locationDao, vehicleDao)
         }
     }
 }

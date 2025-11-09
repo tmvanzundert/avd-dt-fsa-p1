@@ -42,7 +42,7 @@ class UC1AutoHuren : BaseApplication() {
     }
 
     @Test
-    fun `search available cars within time window returns ok`() = withConfiguredApp {
+    fun `search available cars within location proximity`() = withConfiguredApp {
         //TODO add query parameters for date
         val availableCarsJson = """
             {
@@ -50,7 +50,7 @@ class UC1AutoHuren : BaseApplication() {
             }
         """.trimIndent()
 
-        val response = client.get("/location/search") {
+        val response = client.get("/location/search/proximity") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
