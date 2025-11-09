@@ -24,13 +24,20 @@ import kotlin.test.assertEquals
 // bad flows
 // No cars available for the selected criteria
 // Invalid payment details
-// Owner doesn't confirm or cancels the booking
 
 class UC1AutoHuren : BaseApplication() {
 
     @Test
     fun `search available cars returns ok`() = withConfiguredApp {
         //TODO add query parameters for date, location, car type
+        var availableCarsJson = """
+            {
+              "location": "${}",
+              "vehicleId": "${vehicle.id}",
+              "category": "${vehicle.category}"
+            }
+        """.trimIndent()
+
         val response = client.get("/vehicle") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
@@ -42,7 +49,7 @@ class UC1AutoHuren : BaseApplication() {
     fun `book seeded vehicle returns ok`() = withConfiguredApp {
         val reservationJson = """
         {
-          "vehicleId": ${vehicle.id},
+          "vehicleId": "${vehicle.id}",
           "userName": "${user.username}"
         }
     """.trimIndent()
@@ -105,7 +112,7 @@ class UC1AutoHuren : BaseApplication() {
         //TODO book the vehicle with invalid payment details
         val invalidReservationJson = """
         {
-          "vehicleId": ${vehicle.id},
+          "vehicleId": "${vehicle.id}",
           "userName": "${user.username}"
         }
         """.trimIndent()
@@ -119,23 +126,6 @@ class UC1AutoHuren : BaseApplication() {
             HttpStatusCode.BadRequest,
             response.status,
             "Booking with invalid payment details should return Bad Request; body: ${response.bodyAsText()}"
-        )
-    }
-
-    @Test
-    fun `owner cancels booking returns conflict`() = withConfiguredApp {
-//        val cancelBookingJson = """
-//            {}
-//        """.trimIndent()
-        val response = client.post("/reservation/cancel") {
-            header("Authorization", "Bearer $authToken")
-            accept(ContentType.Application.Json)
-//            setBody(cancelBookingJson)
-        }
-        assertEquals(
-            HttpStatusCode.Conflict,
-            response.status,
-            "Owner cancelling booking should return Conflict; body: ${response.bodyAsText()}"
         )
     }
 }

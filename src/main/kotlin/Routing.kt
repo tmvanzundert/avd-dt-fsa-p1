@@ -10,7 +10,6 @@ import io.ktor.server.routing.*
 import kotlinx.serialization.Serializable
 import kotlin.reflect.full.memberProperties
 
-// Store all the required information when signing up
 @Serializable
 data class SignupRequest (
     val firstName: String,
@@ -21,7 +20,6 @@ data class SignupRequest (
     val password: String
 )
 
-// Easily convert the SignupRequest to a User object
 fun SignupRequest.toUser(userDao: UserDao): User {
     return User(
         firstName = this.firstName,
@@ -33,20 +31,19 @@ fun SignupRequest.toUser(userDao: UserDao): User {
     )
 }
 
-// Store the username and password when logging in
 @Serializable
 data class LoginRequest(val username: String, val password: String)
 
 fun Application.configureRouting(jwtConfig: JWTConfig) {
-    // Create the DAO objects for use in the routing
     val userDao = UserDao()
     val vehicleDao = VehicleDao()
     val reservationsDao = ReservationsDao()
     val notificationDao = NotificationDao()
+    val paymentsDao = PaymentsDao()
+    val locationDao = LocationDao()
 
     routing {
 
-        // If a user wants to sign up, create the user in the database
         post("/signup") {
 
             // Set the User from the request and throw error if not all fields are filled in
@@ -101,13 +98,14 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             return@post call.respond(mapOf("token" to token))
         }
 
-        // Import the other routes that are written in other files for readability
         authenticate("jwt-auth") {
             imageRoutes()
             userRoutes(userDao)
             vehicleRoutes(vehicleDao)
             reservationsRoutes(userDao, reservationsDao)
             notificationRoutes(userDao, /* notificationDao */)
+            paymentRoutes(paymentsDao)
+            locationRoutes(locationDao)
         }
     }
 }
