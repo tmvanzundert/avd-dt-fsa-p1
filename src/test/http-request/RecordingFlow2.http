@@ -23,11 +23,33 @@ Content-Type: application/json
 > {% client.global.set("bearerToken", response.body.token); %}
 
 ### Create vehicle for rent
-POST http://localhost:8085/
+POST http://localhost:8085/vehicle
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
-### Rent out my car for a period of time
+{
+  "id": 20,
+  "make": "Toyota",
+  "model": "Corolla",
+  "year": 2020,
+  "category": "Sedan",
+  "seats": 5,
+  "range": 600.0,
+  "licensePlate": "ABC1234",
+  "status": "AVAILABLE",
+  "location": 1,
+  "ownerId": 1,
+  "photoPath": "/path/to/photo.jpg",
+  "totalYearlyUsageKilometers": 0,
+  "tco": 0.0
+}
+
+### Set car for rent for a period of time
 POST http://localhost:8085/
 Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+//TODO: set car with id 20 for rent for a period of time
+
+### Delete vehicle
+DELETE http://localhost:8085/vehicle/20
 Authorization: Bearer {{bearerToken}}

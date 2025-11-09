@@ -27,6 +27,8 @@ GET http://localhost:8085/location/search
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
+//TODO: this should return vehicles near the specified location
+
 {
   "name": "Breda"
 }
@@ -36,7 +38,4 @@ POST http://localhost:8085/
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
-### Send message to owner
-POST http://localhost:8085/
-Content-Type: application/json
-Authorization: Bearer {{bearerToken}}
+//TODO: book a vehicle from our previous search
