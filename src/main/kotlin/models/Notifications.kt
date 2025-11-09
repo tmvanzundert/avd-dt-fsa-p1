@@ -5,7 +5,7 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.datetime
 
-object NotificationTable : Table("notification") {
+object NotificationTable : Table("notifications") {
     val id: Column<Long> = long("id").autoIncrement()
     val user_id: Column<Long> = long("user_id").references(UserTable.id) // I’d drop uniqueIndex() here, see notes below
     val type: Column<String> = varchar("type", 40)

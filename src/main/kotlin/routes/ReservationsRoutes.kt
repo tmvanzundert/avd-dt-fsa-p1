@@ -31,16 +31,22 @@ fun Route.reservationsRoutes(
         call.respond(HttpStatusCode.OK, responseBody)
     }
 
-    post("/reservation/{id}/{startTime}/{endTime}") {
+    post("/reservation/{id}/{userId}/{startTime}/{endTime}") {
         val id = call.parameters["id"]?.toLongOrNull()
             ?: return@post call.respond(
                 HttpStatusCode.BadRequest,
                 "Invalid or missing reservation ID"
             )
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing user ID"
+            )
+
         val startTime: LocalDateTime = LocalDateTime.parse(call.parameters["startTime"].toString())
         val endTime: LocalDateTime = LocalDateTime.parse(call.parameters["endTime"].toString())
 
-        ReservationsDao().reserveCar(id, startTime, endTime)
+        ReservationsDao().reserveCar(id, userId, startTime, endTime)
 
         call.respond(
             HttpStatusCode.OK,

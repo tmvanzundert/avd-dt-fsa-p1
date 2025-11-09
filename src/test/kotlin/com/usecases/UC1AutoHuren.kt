@@ -13,15 +13,6 @@ import io.ktor.http.contentType
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-// Test cases for UC1: Auto Huren (Car Rental)
-// happy flows
-// Log in as a registered user (Already implemented)
-// Search for available cars based on criteria (date, location, car type)
-// Select a car and proceed to booking (grab the vehicle)
-// Enter personal and payment details (log a booking)
-// renter receive a confirmation message (can this be done in a web-api?)
-// Send a notification to the owner about the booking (can this be done in a web-api?)
-
 class UC1AutoHuren : BaseApplication() {
 
     @Test
@@ -70,7 +61,8 @@ class UC1AutoHuren : BaseApplication() {
         val notificationJson = """
         {
           "message": "Test notification from UC1",
-          "userName": "${user.username}"
+          "type": "INFO",
+          "userId": 1
         }
     """.trimIndent()
 

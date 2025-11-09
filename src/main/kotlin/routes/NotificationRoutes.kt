@@ -14,7 +14,7 @@ import kotlin.time.ExperimentalTime
 @Serializable
 data class NotificationRequest(
     val message: String,
-    val userName: String,
+    val userId: Long,
     val type: String = "INFO"
 )
 
@@ -26,7 +26,7 @@ fun Route.notificationRoutes(
     post("/notification") {
         val req = call.receive<NotificationRequest>()
 
-        val user = userDao.findByUsername(req.userName)
+        val user = userDao.findById(req.userId)
             ?: return@post call.respond(HttpStatusCode.BadRequest, "User not found")
 
         val now = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.UTC)

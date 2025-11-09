@@ -37,7 +37,7 @@ Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
 ### Book a vehicle from our previous search
-POST http://localhost:8085/reservation/1/2022-01-01T00:00:00/2026-01-01T00:00:00
+POST http://localhost:8085/reservation/1/2/2022-01-01T00:00:00/2026-01-01T00:00:00
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
