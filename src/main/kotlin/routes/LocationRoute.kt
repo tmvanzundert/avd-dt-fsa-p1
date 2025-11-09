@@ -3,8 +3,10 @@ package com.example.routes
 import com.example.models.Location
 import com.example.models.LocationDao
 import io.ktor.http.*
+import io.ktor.server.request.receive
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 class LocationRoute(
@@ -23,39 +25,22 @@ fun Route.locationRoutes(locationDao: LocationDao) {
         delete()
     }
 
+    @Serializable
+    data class LocationSearchRequest(val name: String?)
+
     get("/location/search") {
-        val name = call.request.queryParameters["name"]
-        val addressFragment = call.request.queryParameters["addressFragment"]
+        val request = call.receive<LocationSearchRequest>()
+        val name = request.name ?: return@get call.respondText(
+            text = "Provide at least one search parameter: 'name' or 'addressFragment'",
+            status = HttpStatusCode.BadRequest
+        )
 
-        if (name == null && addressFragment == null) {
-            return@get call.respondText(
-                text = "Provide at least one search parameter: 'name' or 'addressFragment'",
-                status = HttpStatusCode.BadRequest
-            )
-        }
+        val location = locationDao.findByName(name)
 
-        val results = when {
-            name != null && addressFragment == null -> {
-                locationDao.findByName(name)?.let { listOf(it) } ?: emptyList()
-            }
-            name == null && addressFragment != null -> {
-                locationDao.findByAddressFragment(addressFragment)
-            }
-            else -> {
-                val byName = locationDao.findByName(name!!)
-                val byAddress = locationDao.findByAddressFragment(addressFragment!!)
-                if (byName == null) {
-                    emptyList()
-                } else {
-                    byAddress.filter { it.id == byName.id }
-                }
-            }
-        }
-
-        if (results.isEmpty()) {
+        if (location == null) {
             call.respond(HttpStatusCode.NoContent)
         } else {
-            call.respond(results)
+            call.respond(location)
         }
     }
 }

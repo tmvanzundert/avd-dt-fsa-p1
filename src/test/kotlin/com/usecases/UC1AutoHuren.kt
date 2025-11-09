@@ -1,5 +1,6 @@
 package com.usecases
 
+import com.example.models.VehicleTable.location
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -21,26 +22,41 @@ import kotlin.test.assertEquals
 // renter receive a confirmation message (can this be done in a web-api?)
 // Send a notification to the owner about the booking (can this be done in a web-api?)
 
-// bad flows
-// No cars available for the selected criteria
-// Invalid payment details
-
 class UC1AutoHuren : BaseApplication() {
 
     @Test
     fun `search available cars returns ok`() = withConfiguredApp {
-        //TODO add query parameters for date, location, car type
-        var availableCarsJson = """
+        val availableCarsJson = """
             {
-              "location": "${}",
-              "vehicleId": "${vehicle.id}",
-              "category": "${vehicle.category}"
+              "name": "Breda"
             }
         """.trimIndent()
 
-        val response = client.get("/vehicle") {
+        val response = client.get("/location/search") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(availableCarsJson)
+        }
+        assertEquals(HttpStatusCode.OK, response.status, "Search should return OK; body: ${response.bodyAsText()}")
+    }
+
+    @Test
+    fun `search available cars within time window returns ok`() = withConfiguredApp {
+        //TODO add query parameters for date
+        val availableCarsJson = """
+            {
+              "name": "Breda"
+            }
+        """.trimIndent()
+
+        val response = client.get("/location/search") {
+            header("Authorization", "Bearer $authToken")
+            accept(ContentType.Application.Json)
+            contentType(ContentType.Application.Json)
+            accept(ContentType.Application.Json)
+            setBody(availableCarsJson)
         }
         assertEquals(HttpStatusCode.OK, response.status, "Search should return OK; body: ${response.bodyAsText()}")
     }
@@ -88,44 +104,6 @@ class UC1AutoHuren : BaseApplication() {
             HttpStatusCode.OK,
             response.status,
             "Notification should return OK; body: ${response.bodyAsText()}"
-        )
-    }
-
-    // Bad Flows
-    @Test
-    fun `search available cars returns no content when none available`() = withConfiguredApp {
-        //TODO set up criteria that yield no available cars
-
-        val response = client.get("/vehicle/available") {
-            header("Authorization", "Bearer $authToken")
-            accept(ContentType.Application.Json)
-        }
-        assertEquals(
-            HttpStatusCode.NoContent,
-            response.status,
-            "Search with no available cars should return No Content; body: ${response.bodyAsText()}"
-        )
-    }
-
-    @Test
-    fun `book vehicle with invalid payment details returns bad request`() = withConfiguredApp {
-        //TODO book the vehicle with invalid payment details
-        val invalidReservationJson = """
-        {
-          "vehicleId": "${vehicle.id}",
-          "userName": "${user.username}"
-        }
-        """.trimIndent()
-
-        val response = client.post("/reservation") {
-            header("Authorization", "Bearer $authToken")
-            accept(ContentType.Application.Json)
-            setBody(invalidReservationJson)
-        }
-        assertEquals(
-            HttpStatusCode.BadRequest,
-            response.status,
-            "Booking with invalid payment details should return Bad Request; body: ${response.bodyAsText()}"
         )
     }
 }

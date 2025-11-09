@@ -27,11 +27,14 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
     get("/vehicle/available") {
         val vehicles = vehicleDao.findAll()
         val available = vehicles.filter { it.status == VehicleStatus.AVAILABLE }
+        println("Current vehicles: $vehicles")
+        println("Available vehicles: $available")
 
         if (available.isEmpty()) {
             call.respond(HttpStatusCode.NoContent)
         } else {
             call.respond(available)
+            call.respond(vehicles)
         }
     }
 

@@ -6,7 +6,6 @@ import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 interface LocationRepository: CrudRepository<Location, Long> {
     fun addLocation(location: Location): Location
     fun findByName(name: String): Location?
-    fun findByAddressFragment(fragment: String): List<Location>
 }
 
 class LocationDao :
@@ -37,7 +36,4 @@ class LocationDao :
         return findAll().find { it.name.equals(name, ignoreCase = true) }
     }
 
-    override fun findByAddressFragment(fragment: String): List<Location> {
-        return findAll().filter { it.address.contains(fragment, ignoreCase = true) }
-    }
 }

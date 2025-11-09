@@ -3,8 +3,8 @@ USE plugandplay;
 -- Insert locations that are referenced
 INSERT INTO locations (name, address) VALUES
 ('Breda', 'Stationsplein 1, 4811 BB Breda'),
-('Breda Centrum', 'Grote Markt 38, 4811 XS Breda'),
-('Breda Princenhage', 'Haagweg 334, 4813 XE Breda');
+('Breda', 'Grote Markt 38, 4811 XS Breda'),
+('Breda', 'Haagweg 334, 4813 XE Breda');
 
 -- Insert users
 INSERT INTO users (
