@@ -1,6 +1,5 @@
 package com.usecases
 
-import com.example.models.VehicleTable.location
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header

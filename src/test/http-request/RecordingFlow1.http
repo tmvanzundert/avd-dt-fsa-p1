@@ -1,0 +1,42 @@
+### Sign up and get Bearer token
+POST http://localhost:8085/signup
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
+}
+
+### Login and get Bearer token
+POST http://localhost:8085/login
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+> {% client.global.set("bearerToken", response.body.token); %}
+
+### Find vehicle in proximity
+GET http://localhost:8085/location/search
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+{
+  "name": "Breda"
+}
+
+### Book a vehicle from our previous search
+POST http://localhost:8085/
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+### Send message to owner
+POST http://localhost:8085/
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
