@@ -1,5 +1,6 @@
 package com.usecases
 
+import com.BaseApplication
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -24,26 +25,7 @@ import kotlin.test.assertEquals
 class UC1AutoHuren : BaseApplication() {
 
     @Test
-    fun `search available cars returns ok`() = withConfiguredApp {
-        val availableCarsJson = """
-            {
-              "name": "Breda"
-            }
-        """.trimIndent()
-
-        val response = client.get("/location/search") {
-            header("Authorization", "Bearer $authToken")
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(availableCarsJson)
-        }
-        assertEquals(HttpStatusCode.OK, response.status, "Search should return OK; body: ${response.bodyAsText()}")
-    }
-
-    @Test
     fun `search available cars within location proximity`() = withConfiguredApp {
-        //TODO add query parameters for date
         val availableCarsJson = """
             {
               "name": "Breda"
@@ -85,7 +67,6 @@ class UC1AutoHuren : BaseApplication() {
 
     @Test
     fun `Send message to renter and owner returns ok`() = withConfiguredApp {
-        //TODO send notification to renter and owner
         val notificationJson = """
         {
           "message": "Test notification from UC1",

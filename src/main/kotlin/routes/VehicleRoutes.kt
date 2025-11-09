@@ -9,7 +9,6 @@ import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.toLocalDateTime
 import kotlin.reflect.KClass
 
 class VehicleRoute(entityClass: KClass<Vehicle>, override val dao: VehicleDao) : ModelRoute<VehicleDao, Vehicle>("vehicle", entityClass) {
@@ -51,6 +50,26 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         } else {
             call.respond(filterVehicles)
         }
+    }
+
+    get("/vehicle/available/{id}/{timeStart}/{timeEnd}") {
+        val id: Long = (call.parameters["id"]?.toLongOrNull()
+            ?: call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing vehicle ID"
+            )) as Long
+
+        val timeStart: LocalDateTime = LocalDateTime.parse(call.parameters["timeStart"]!!)
+        val timeEnd: LocalDateTime = LocalDateTime.parse(call.parameters["timeEnd"]!!)
+
+        vehicleDao.updateProperty(id, "status", VehicleStatus.AVAILABLE)
+        vehicleDao.updateProperty(id, "beginAvailable", timeStart)
+        vehicleDao.updateProperty(id, "endAvailable", timeEnd)
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Vehicle $id is now available"
+        )
     }
 
 }

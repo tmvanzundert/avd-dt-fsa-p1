@@ -1,17 +1,16 @@
 package com.example.models
 
+import kotlinx.datetime.LocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
-import java.time.LocalDateTime
-import java.time.LocalTime
 
 
 interface ReservationsRepository : CrudRepository<Reservations, Long> {
 
-    fun reserveCar(reservation: Reservations)
+    fun reserveCar(carId: Long, startTime: LocalDateTime, endTime: LocalDateTime)
     fun isCarReserved(vehicleId: Long): Boolean
     fun getCarReservationStatus(vehicleId: Long): String
-    fun makeCarReservable(vehicleId: Long, startTime: LocalDateTime, endTime: LocalDateTime)
+    fun makeCarReservable(vehicleId: Long)
 }
 
 class ReservationsDao :
@@ -23,7 +22,7 @@ class ReservationsDao :
             id = row[ReservationTable.id],
             user_id = row[ReservationTable.user_id],
             vehicle_id = row[ReservationTable.vehicle_id],
-            rate_plan_id = row[ReservationTable.rate_plan],
+            rate_plan_id = row[ReservationTable.rate_plan_id],
             staff_id = row[ReservationTable.staff_id],
             start_at = row[ReservationTable.start_at],
             end_at = row[ReservationTable.end_at],
@@ -38,7 +37,7 @@ class ReservationsDao :
         statement[ReservationTable.id] = entity.id
         statement[ReservationTable.user_id] = entity.user_id
         statement[ReservationTable.vehicle_id] = entity.vehicle_id
-        statement[ReservationTable.rate_plan] = entity.rate_plan_id
+        statement[ReservationTable.rate_plan_id] = entity.rate_plan_id
         statement[ReservationTable.staff_id] = entity.staff_id
         statement[ReservationTable.start_at] = entity.start_at
         statement[ReservationTable.end_at] = entity.end_at
@@ -48,15 +47,17 @@ class ReservationsDao :
         statement[ReservationTable.dropoff_location_id] = entity.dropoff_location_id
     }
 
-    override fun reserveCar(reservation: Reservations) {
+    override fun reserveCar(carId: Long, startTime: LocalDateTime, endTime: LocalDateTime) {
         val vehicleDao = VehicleDao()
-        if (!vehicleDao.isAvailable(reservation.vehicle_id)) {
-            throw Exception("Vehicle ${reservation.vehicle_id} is not available for reservation")
-        }
-        create(reservation)
+        vehicleDao.findById(carId) ?: throw Exception("Vehicle not found")
+
+        updateProperty(carId, "start_at", startTime)
+        updateProperty(carId, "end_at", endTime)
+
+        val reservation = findAll().firstOrNull { it.vehicle_id == carId }
+            ?: throw Exception("Reservation not found for vehicle $carId")
         vehicleDao.updateProperty(reservation.vehicle_id, "status", VehicleStatus.RENTED)
     }
-
 
     override fun isCarReserved(vehicleId: Long): Boolean {
         val vehicleDao = VehicleDao()
@@ -70,11 +71,9 @@ class ReservationsDao :
         return vehicle.status.toString()
     }
 
-    override fun makeCarReservable(vehicleId: Long, startTime: LocalDateTime, endTime: LocalDateTime) {
+    override fun makeCarReservable(vehicleId: Long) {
         val vehicleDao = VehicleDao()
         vehicleDao.findById(vehicleId) ?: throw Exception("Vehicle not found")
         vehicleDao.updateProperty(vehicleId, "status", VehicleStatus.AVAILABLE)
-        vehicleDao.updateProperty(vehicleId, "start_time", startTime)
-        vehicleDao.updateProperty(vehicleId, "end_time", endTime)
     }
 }

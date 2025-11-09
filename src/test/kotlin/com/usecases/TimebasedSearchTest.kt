@@ -1,5 +1,6 @@
 package com.usecases
 
+import com.BaseApplication
 import com.example.models.Vehicle
 import io.ktor.client.request.accept
 import io.ktor.client.request.get

@@ -1,9 +1,18 @@
-package com.usecases
+package com
 
-import com.example.*
-import com.example.models.*
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
+import com.example.JWTConfig
+import com.example.configureDatabase
+import com.example.configureJWTAuthentication
+import com.example.configureRouting
+import com.example.configureSerialization
+import com.example.configureStatusPages
+import com.example.models.User
+import com.example.models.UserDao
+import com.example.models.Vehicle
+import com.example.models.VehicleDao
+import com.example.models.VehicleStatus
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -13,9 +22,12 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.application.Application
-import io.ktor.server.testing.*
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import kotlinx.datetime.LocalDateTime
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
 
 open class BaseApplication {
 
@@ -34,8 +46,8 @@ open class BaseApplication {
         photoPath = "[]",
         totalYearlyUsageKilometers = 0L,
         tco = 0.0,
-        beginAvailable = LocalDateTime.parse("2020-01-01T00:00:00"),
-        endAvailable = LocalDateTime.parse("2020-12-31T00:00:00")
+        beginAvailable = LocalDateTime.Companion.parse("2020-01-01T00:00:00"),
+        endAvailable = LocalDateTime.Companion.parse("2020-12-31T00:00:00")
     )
 
     protected val userDao = UserDao()
@@ -91,7 +103,11 @@ open class BaseApplication {
             setBody("""{"username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"}""")
         }
 
-        assertEquals(HttpStatusCode.OK, response.status, "Signup should succeed; body: ${response.bodyAsText()}")
+        assertEquals(
+            HttpStatusCode.Companion.OK,
+            response.status,
+            "Signup should succeed; body: ${response.bodyAsText()}"
+        )
 
         val createdUser: User = userDao.findByUsername(user.username)
             ?: error("User '${user.username}' should exist after signup")

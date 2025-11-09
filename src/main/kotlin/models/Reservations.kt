@@ -6,11 +6,11 @@ import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import org.jetbrains.exposed.v1.datetime.datetime
 
-object ReservationTable: Table("Reservations") {
+object ReservationTable: Table("reservations") {
     val id: Column<Long> = long("id").autoIncrement()
     val user_id: Column<Long> = long("user_id")
     val vehicle_id: Column<Long> = long("vehicle_id")
-    val rate_plan: Column<Long> = long("rate_plan")
+    val rate_plan_id: Column<Long> = long("rate_plan_id")
     val staff_id: Column<Long> = long("staff_id")
     val start_at: Column<LocalDateTime> = datetime("start_at")
     val end_at: Column<LocalDateTime> = datetime("end_at")

@@ -16,6 +16,7 @@ object VehicleTable : Table("vehicles") {
     val seats: Column<Int> = integer("seats")
     val range: Column<Double> = double("range_km")
     val licensePlate: Column<String> = varchar("license_plate", 20)
+    val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
     val location: Column<Long> = long("location_id")
     val ownerId: Column<Long> = long("owner_user_id")
     val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
@@ -37,7 +38,7 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val seats: Int,
     val range: Double,
     val licensePlate: String,
-    val status: VehicleStatus = VehicleStatus.NULL,
+    val status: VehicleStatus = VehicleStatus.AVAILABLE,
     val location: Long,
     val ownerId: Long,
     val photoPath: String = "[]",
@@ -51,6 +52,5 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
 enum class VehicleStatus {
     AVAILABLE,
     RENTED,
-    MAINTENANCE,
-    NULL
+    MAINTENANCE
 }

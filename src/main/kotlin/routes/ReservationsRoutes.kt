@@ -6,6 +6,7 @@ import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 
 fun Route.reservationsRoutes(
@@ -28,6 +29,23 @@ fun Route.reservationsRoutes(
         )
 
         call.respond(HttpStatusCode.OK, responseBody)
+    }
+
+    post("/reservation/{id}/{startTime}/{endTime}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing reservation ID"
+            )
+        val startTime: LocalDateTime = LocalDateTime.parse(call.parameters["startTime"].toString())
+        val endTime: LocalDateTime = LocalDateTime.parse(call.parameters["endTime"].toString())
+
+        ReservationsDao().reserveCar(id, startTime, endTime)
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Reservation $id updated with begin time $startTime and end time $endTime"
+        )
     }
 }
 

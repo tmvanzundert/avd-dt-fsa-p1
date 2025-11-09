@@ -31,16 +31,17 @@ Authorization: Bearer {{bearerToken}}
   "name": "Breda"
 }
 
-### Book a vehicle from our previous search
-POST http://localhost:8085/reservation
+### Find Vehicle in time window
+GET http://localhost:8085/vehicle/2021-01-01T00:00:00/2022-01-01T00:00:00
 Content-Type: application/json
 Authorization: Bearer {{bearerToken}}
 
-//TODO: book a vehicle from our previous search
+### Book a vehicle from our previous search
+POST http://localhost:8085/reservation/1/2022-01-01T00:00:00/2026-01-01T00:00:00
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
 
-{
-  "start_time": "10-12-2025",
-  "end_time": "10-12-2026",
-  "vehicleId": 20,
-  "userName": ""
-}
+### Show status of vehicle
+GET http://localhost:8085/vehicle/1
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
