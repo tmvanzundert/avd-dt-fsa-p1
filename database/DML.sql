@@ -38,12 +38,14 @@ INSERT INTO vehicles (
     location_id,
     owner_user_id,
     photo_path,
-    total_yearly_kilometers
+    total_yearly_kilometers,
+    begin_available,
+    end_available
 )
 VALUES
-('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456),
-('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456),
-('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456);
+('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456, "2020-01-01T00:00:00", "2020-12-31T00:00:00"),
+('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456, "2021-01-01T00:00:00", "2021-12-31T00:00:00"),
+('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456, "2022-01-01T00:00:00", "2022-12-31T00:00:00");
 
 INSERT INTO  rental_contracts (
     vehicle_id,

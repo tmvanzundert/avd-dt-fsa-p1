@@ -12,6 +12,7 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.application.Application
 import io.ktor.server.testing.*
+import kotlinx.datetime.LocalDateTime
 import kotlin.test.*
 
 class VehicleRepositoryTest {
@@ -30,7 +31,9 @@ class VehicleRepositoryTest {
         ownerId = 1L,
         photoPath = "[]",
         totalYearlyUsageKilometers = 0L,
-        tco = 0.0
+        tco = 0.0,
+        beginAvailable = LocalDateTime.parse("2020-01-01T00:00:00"),
+        endAvailable = LocalDateTime.parse("2020-12-31T00:00:00"),
     )
 
     private val userDao = UserDao()

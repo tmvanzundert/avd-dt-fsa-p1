@@ -3,8 +3,9 @@ package com.example.models
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
 import kotlinx.serialization.Serializable
-import java.math.BigDecimal
+import org.jetbrains.exposed.v1.datetime.datetime
 import kotlin.time.ExperimentalTime
+import kotlinx.datetime.LocalDateTime
 
 object VehicleTable : Table("vehicles") {
     val id: Column<Long> = long("id").autoIncrement()
@@ -20,6 +21,8 @@ object VehicleTable : Table("vehicles") {
     val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
     val totalYearlyUsageKilometers: Column<Long> = long("total_yearly_kilometers")
     val tco: Column<Double?> = double("tco").default(0.0) as Column<Double?>
+    val beginAvailable: Column<LocalDateTime> = datetime("begin_available")
+    val endAvailable: Column<LocalDateTime> = datetime("end_available")
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -39,7 +42,9 @@ data class Vehicle @OptIn(ExperimentalTime::class) constructor(
     val ownerId: Long,
     val photoPath: String = "[]",
     val totalYearlyUsageKilometers: Long = 0,
-    val tco: Double?
+    val tco: Double?,
+    val beginAvailable: LocalDateTime,
+    val endAvailable: LocalDateTime
 )
 
 @Serializable

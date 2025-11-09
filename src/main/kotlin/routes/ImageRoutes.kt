@@ -8,6 +8,7 @@ import io.ktor.server.response.respondText
 import io.ktor.server.routing.*
 import io.ktor.util.cio.writeChannel
 import io.ktor.utils.io.copyAndClose
+import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.json.*
 import java.io.*
 import kotlin.text.toLong
@@ -113,7 +114,9 @@ fun Route.imageRoutes() {
             totalYearlyUsageKilometers = 0,
             ownerId = 1L,
             photoPath = "",
-            tco = 0.0
+            tco = 0.0,
+            beginAvailable = LocalDateTime.parse("2020-01-01T00:00:00"),
+            endAvailable = LocalDateTime.parse("2020-12-31T00:00:00")
         )
 
         // Update vehicle with new photo paths
