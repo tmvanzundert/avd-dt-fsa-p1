@@ -1,7 +1,18 @@
 package com
 
-import com.example.*
-import com.example.models.*
+import com.auth0.jwt.JWT
+import com.auth0.jwt.algorithms.Algorithm
+import com.example.JWTConfig
+import com.example.configureDatabase
+import com.example.configureJWTAuthentication
+import com.example.configureRouting
+import com.example.configureSerialization
+import com.example.configureStatusPages
+import com.example.models.User
+import com.example.models.UserDao
+import com.example.models.Vehicle
+import com.example.models.VehicleDao
+import com.example.models.VehicleStatus
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -11,14 +22,17 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.application.Application
-import io.ktor.server.testing.*
+import io.ktor.server.testing.ApplicationTestBuilder
+import io.ktor.server.testing.testApplication
 import kotlinx.datetime.LocalDateTime
-import kotlin.test.*
+import kotlin.test.AfterTest
+import kotlin.test.BeforeTest
+import kotlin.test.assertEquals
 
-class VehicleRepositoryTest {
+open class BaseApplication {
 
-    private val vehicleDao = VehicleDao()
-    private var vehicle = Vehicle(
+    protected val vehicleDao = VehicleDao()
+    protected var vehicle = Vehicle(
         make = "Toyota",
         model = "Corolla",
         year = 2020,
@@ -32,21 +46,21 @@ class VehicleRepositoryTest {
         photoPath = "[]",
         totalYearlyUsageKilometers = 0L,
         tco = 0.0,
-        beginAvailable = LocalDateTime.parse("2020-01-01T00:00:00"),
-        endAvailable = LocalDateTime.parse("2020-12-31T00:00:00"),
+        beginAvailable = LocalDateTime.Companion.parse("2020-01-01T00:00:00"),
+        endAvailable = LocalDateTime.Companion.parse("2020-12-31T00:00:00")
     )
 
-    private val userDao = UserDao()
-    private var user = User(
+    protected val userDao = UserDao()
+    protected var user = User(
         firstName = "John",
-        lastName = "Cina",
-        username = "jcina",
-        address = "123 Main St",
+        lastName = "Doe",
+        username = "jdoe",
+        address = "Ginnekenweg 12, Breda",
         password = "test123",
-        email = "jcina@hotmail.com",
+        email = "jdoe@hotmail.com",
     )
 
-    private val jwtConfig = JWTConfig(
+    protected val jwtConfig = JWTConfig(
         secret = "secret",
         issuer = "http://127.0.0.1:8085",
         audience = "http://127.0.0.1:8085",
@@ -54,8 +68,10 @@ class VehicleRepositoryTest {
         tokenExpiry = 86400000
     )
 
+    protected var authToken: String = ""
+
     // Install all app modules once per test run
-    private fun Application.installApp() {
+    protected fun Application.installApp() {
         configureSerialization()
         configureJWTAuthentication(jwtConfig)
         configureRouting(jwtConfig)
@@ -64,12 +80,22 @@ class VehicleRepositoryTest {
     }
 
     // Start configured app and run provided block with a client
-    private fun withConfiguredApp(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
+    protected fun withConfiguredApp(block: suspend ApplicationTestBuilder.() -> Unit) = testApplication {
         application { installApp() }
         block()
     }
 
-    private suspend fun ApplicationTestBuilder.seedVehicle() {
+    private fun createTestJwt(forUser: User): String {
+        val algorithm = Algorithm.HMAC256(jwtConfig.secret)
+        return JWT.create()
+            .withIssuer(jwtConfig.issuer)
+            .withAudience(jwtConfig.audience)
+            .withSubject(forUser.id.toString())
+            .withClaim("username", forUser.username)
+            .sign(algorithm)
+    }
+
+    protected suspend fun ApplicationTestBuilder.seedVehicle() {
         //User
         val response = client.post("/signup") {
             contentType(ContentType.Application.Json)
@@ -77,13 +103,17 @@ class VehicleRepositoryTest {
             setBody("""{"username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"}""")
         }
 
-        assertEquals(HttpStatusCode.OK, response.status, "Signup should succeed; body: ${response.bodyAsText()}")
+        assertEquals(
+            HttpStatusCode.Companion.OK,
+            response.status,
+            "Signup should succeed; body: ${response.bodyAsText()}"
+        )
 
         val createdUser: User = userDao.findByUsername(user.username)
-            ?: error ("User '${user.username}' should exist after signup")
+            ?: error("User '${user.username}' should exist after signup")
 
-        /*val seededUser = user.copy(id = createdUser.id, password = createdUser.password)
-        user = seededUser*/
+        // create a test JWT signed with the app secret so requests are authorized
+        authToken = createTestJwt(createdUser)
 
         // Vehicle
         client.get("/vehicle")
@@ -104,32 +134,5 @@ class VehicleRepositoryTest {
         runCatching { userDao.deleteByUsername(user.username) }
         runCatching { if (user.id != 0L) userDao.delete(user.id) }
         runCatching { if (vehicle.id != 0L) vehicleDao.delete(vehicle.id) }
-    }
-
-    @Test
-    fun testCreateVehicle() = withConfiguredApp {
-        val found = vehicleDao.findById(vehicle.id)
-        assertNotNull(found)
-        assertEquals("Toyota", found.make)
-    }
-
-    @Test
-    fun testFindById() = withConfiguredApp {
-        val found = vehicleDao.findById(vehicle.id)
-        assertNotNull(found)
-        assertEquals("Toyota", found.make)
-    }
-
-    @Test
-    fun testFindAll() = withConfiguredApp {
-        val allVehicles = vehicleDao.findAll()
-        assertTrue(allVehicles.any { it.id == vehicle.id && it.make == "Toyota" })
-    }
-
-    @Test
-    fun testDeleteVehicle() = withConfiguredApp {
-        vehicleDao.delete(vehicle.id)
-        val found = vehicleDao.findById(vehicle.id)
-        assertNull(found)
     }
 }

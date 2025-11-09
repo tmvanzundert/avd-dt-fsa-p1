@@ -1,94 +1,26 @@
 package com
 
-import com.example.JWTConfig
-import com.example.configureDatabase
-import com.example.configureJWTAuthentication
-import com.example.configureRouting
-import com.example.configureSerialization
-import com.example.configureStatusPages
-import com.example.models.Role
-import com.example.models.User
-import com.example.models.UserDao
 import io.ktor.client.HttpClient
 import io.ktor.client.request.*
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.forms.*
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.*
-import io.ktor.server.application.Application
-import io.ktor.server.testing.ApplicationTestBuilder
-import io.ktor.server.testing.testApplication
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.io.File
 import kotlin.test.*
 
-class MultiUploadFileTest {
+class MultiUploadFileTest : BaseApplication() {
     // Reusable test constants
     private val boundary = "WebAppBoundary"
     private val extension = "jpg"
     private val testPicture = "src/test/http-request/ktor.jpg"
     private val imageBytes = File(testPicture).readBytes()
 
-    // Auth/token state
-    private lateinit var authToken: String
-
-    // Test user and DAO
-    private val userDao = UserDao()
-    private var user = User(
-        firstName = "John",
-        lastName = "Cina",
-        username = "jcina",
-        address = "123 Main St",
-        password = "test123",
-        email = "jcina@hotmail.com",
-    )
-
-    // Shared JWT config for tests
-    private val jwtConfig = JWTConfig(
-        secret = "secret",
-        issuer = "http://127.0.0.1:8085",
-        audience = "http://127.0.0.1:8085",
-        realm = "Access protected routes",
-        tokenExpiry = 86400000
-    )
-
-    // Helper: install all application modules for tests
-    private fun Application.installApp() {
-        configureSerialization()
-        configureJWTAuthentication(jwtConfig)
-        configureRouting(jwtConfig)
-        configureStatusPages()
-        configureDatabase()
-    }
-
-    // Helper: start a configured test application and run the provided block
-    private fun withConfiguredApp(testBody: suspend ApplicationTestBuilder.() -> Unit) =
-        testApplication {
-            application { installApp() }
-            testBody()
-        }
-
-    // Helper: sign up and return token
-    private suspend fun ApplicationTestBuilder.signupAndGetToken(
-        username: String,
-        password: String
-    ): String {
-        val jsonBody = """
-            "username":"${user.username}","password":"${user.password}", "firstName":"${user.firstName}", "lastName":"${user.lastName}", "address":"${user.address}", "email":"${user.email}"
-        """.trimIndent()
-        val response = client.post("/signup") {
-            contentType(ContentType.Application.Json)
-            accept(ContentType.Application.Json)
-            setBody(jsonBody)
-        }
-        assertEquals(HttpStatusCode.OK, response.status)
-        val tokenResponse = Json.decodeFromString<TokenResponse>(response.bodyAsText())
-        return tokenResponse.token
-    }
-
     // Helper: build multipart body for image uploads
-    private fun buildMultipartBody(description: String, files: List<Pair<String, ByteArray>>): MultiPartFormDataContent =
+    private fun buildMultipartBody(
+        description: String,
+        files: List<Pair<String, ByteArray>>
+    ): MultiPartFormDataContent =
         MultiPartFormDataContent(
             formData {
                 append("description", description)
@@ -107,27 +39,20 @@ class MultiUploadFileTest {
             ContentType.MultiPart.FormData.withParameter("boundary", boundary)
         )
 
-    // Helper: perform upload request
+    // Helper: perform upload request using BaseApplication's authToken
     private suspend fun HttpClient.uploadCarImages(
         carId: String,
-        token: String,
         description: String,
         fileNames: List<String>
     ) = post("/upload/cars/$carId") {
-        bearerAuth(token)
+        bearerAuth(authToken)
         setBody(buildMultipartBody(description, fileNames.map { it to imageBytes }))
-    }
-
-    @BeforeTest
-    fun build() = withConfiguredApp {
-        authToken = signupAndGetToken(user.username, "test123")
     }
 
     @Test
     fun testUploadFourImages() = withConfiguredApp {
         val response = client.uploadCarImages(
             carId = "1",
-            token = authToken,
             description = "Four images test",
             fileNames = (1..4).map { "photo${it}.$extension" }
         )
@@ -144,7 +69,6 @@ class MultiUploadFileTest {
     fun testUploadSingleImage() = withConfiguredApp {
         val response = client.uploadCarImages(
             carId = "1",
-            token = authToken,
             description = "Ktor logo",
             fileNames = listOf("ktor.$extension")
         )
@@ -176,7 +100,6 @@ class MultiUploadFileTest {
 
         val response = client.uploadCarImages(
             carId = carId,
-            token = authToken,
             description = "Cleanup test",
             fileNames = listOf("ktor_logo.$extension")
         )
@@ -190,12 +113,4 @@ class MultiUploadFileTest {
         saved.delete()
         carDir.deleteRecursively()
     }
-
-    @AfterTest
-    fun end() = withConfiguredApp {
-        userDao.findByUsername(user.username)?.let { userDao.deleteByUsername(user.username) }
-    }
 }
-
-@Serializable
-data class TokenResponse(val token: String)

@@ -1,0 +1,33 @@
+### Sign up and get Bearer token
+POST http://localhost:8085/signup
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass",
+  "firstName": "test",
+  "lastName": "user",
+  "address": "testuser straat 1",
+  "email": "userrouting@apitestuser.nl"
+}
+
+### Login and get Bearer token
+POST http://localhost:8085/login
+Content-Type: application/json
+
+{
+  "username": "userroutingapitestuser",
+  "password": "userroutingtestpass"
+}
+
+> {% client.global.set("bearerToken", response.body.token); %}
+
+### Set car for rent for a period of time
+GET http://localhost:8085/vehicle/available/1/2022-01-01T00:00:00/2026-01-01T00:00:00
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+### Show status of vehicle
+GET http://localhost:8085/vehicle/1
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}

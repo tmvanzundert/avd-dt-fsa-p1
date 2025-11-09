@@ -3,8 +3,8 @@ USE plugandplay;
 -- Insert locations that are referenced
 INSERT INTO locations (name, address) VALUES
 ('Breda', 'Stationsplein 1, 4811 BB Breda'),
-('Breda Centrum', 'Grote Markt 38, 4811 XS Breda'),
-('Breda Princenhage', 'Haagweg 334, 4813 XE Breda');
+('Breda', 'Grote Markt 38, 4811 XS Breda'),
+('Amsterdam', 'Haagweg 334, 4813 XE Amsterdam');
 
 -- Insert users
 INSERT INTO users (
@@ -24,7 +24,7 @@ INSERT INTO users (
 VALUES
 ('John', 'Doe', 'johndoe', 'Stationsplein 1, 4811 BB Breda', 'CUSTOMER', '0612345678', 'hashedpassword123', 'johndoe@example.com', 4.5, NOW(), '1990-01-01', 'D1234567890'),
 ('Sanne', 'Jansen', 'sannej', 'Grote Markt 38, 4811 XS Breda', 'CUSTOMER', '0623456789', 'hashedpassword456', 'sannej@example.com', 4.8, NOW(), '1985-05-15', 'J9876543210'),
-('Pieter', 'de Vries', 'pieterv', 'Haagweg 334, 4813 XE Breda', 'CUSTOMER', '0634567890', 'hashedpassword789', 'pieterv@example.com', 4.7, NOW(), '1992-09-21', 'V1122334455');
+('Pieter', 'de Vries', 'pieterv', 'Haagweg 334, 4813 XE Amsterdam', 'CUSTOMER', '0634567890', 'hashedpassword789', 'pieterv@example.com', 4.7, NOW(), '1992-09-21', 'V1122334455');
 
 -- Insert vehicles
 INSERT INTO vehicles (
@@ -38,12 +38,14 @@ INSERT INTO vehicles (
     location_id,
     owner_user_id,
     photo_path,
-    total_yearly_kilometers
+    total_yearly_kilometers,
+    begin_available,
+    end_available
 )
 VALUES
-('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456),
-('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456),
-('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456);
+('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456, "2020-01-01T00:00:00", "2020-12-31T00:00:00"),
+('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456, "2021-01-01T00:00:00", "2021-12-31T00:00:00"),
+('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456, "2022-01-01T00:00:00", "2022-12-31T00:00:00");
 
 INSERT INTO  rental_contracts (
     vehicle_id,

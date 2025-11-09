@@ -37,16 +37,6 @@ CREATE TABLE IF NOT EXISTS locations (
     address VARCHAR(255)
 );
 
-CREATE TABLE IF NOT EXISTS vehicle_status (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    type VARCHAR(40) NOT NULL, -- AVAILABLE, RENTED, MAINTENANCE
-    owner_id BIGINT,
-    owner_type VARCHAR(40),
-    uri VARCHAR(255),
-    checksum VARCHAR(128),
-    created_at TIMESTAMP
-);
-
 CREATE TABLE IF NOT EXISTS vehicles (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     make VARCHAR(80) NOT NULL,
@@ -56,11 +46,14 @@ CREATE TABLE IF NOT EXISTS vehicles (
     seats INT NOT NULL,
     range_km INT,
     license_plate VARCHAR(32) UNIQUE NOT NULL,
+    status ENUM('AVAILABLE', 'RENTED', 'MAINTENANCE') DEFAULT 'AVAILABLE',
     location_id BIGINT,
     owner_user_id BIGINT,
     photo_path VARCHAR(255),
     total_yearly_kilometers BIGINT,
     tco DECIMAL(10, 2),
+    begin_available TIMESTAMP,
+    end_available TIMESTAMP,
     FOREIGN KEY (location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (owner_user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE
 );
