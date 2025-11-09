@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import java.math.BigDecimal
 import kotlin.time.ExperimentalTime
 
-object VehicleTable: Table("vehicles") {
+object VehicleTable : Table("vehicles") {
     val id: Column<Long> = long("id").autoIncrement()
     val make: Column<String> = varchar("make", 50)
     val model: Column<String> = varchar("model", 50)

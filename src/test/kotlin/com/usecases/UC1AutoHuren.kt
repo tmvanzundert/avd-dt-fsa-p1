@@ -88,7 +88,8 @@ class UC1AutoHuren : BaseApplication() {
     @Test
     fun `search available cars returns no content when none available`() = withConfiguredApp {
         //TODO set up criteria that yield no available cars
-        val response = client.get("/vehicle") {
+
+        val response = client.get("/vehicle/available") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
         }
@@ -123,14 +124,13 @@ class UC1AutoHuren : BaseApplication() {
 
     @Test
     fun `owner cancels booking returns conflict`() = withConfiguredApp {
-        //TODO simulate owner cancelling the booking
-        val cancelBookingJson = """
-            {}
-        """.trimIndent()
+//        val cancelBookingJson = """
+//            {}
+//        """.trimIndent()
         val response = client.post("/reservation/cancel") {
             header("Authorization", "Bearer $authToken")
             accept(ContentType.Application.Json)
-            setBody(cancelBookingJson)
+//            setBody(cancelBookingJson)
         }
         assertEquals(
             HttpStatusCode.Conflict,
