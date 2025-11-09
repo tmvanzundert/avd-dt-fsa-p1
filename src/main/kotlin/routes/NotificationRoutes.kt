@@ -15,7 +15,7 @@ import kotlin.time.ExperimentalTime
 data class NotificationRequest(
     val message: String,
     val userName: String,
-    val type: String = "INFO"   // optional, default type
+    val type: String = "INFO"
 )
 
 @OptIn(ExperimentalTime::class)
@@ -31,7 +31,6 @@ fun Route.notificationRoutes(
 
         val now = kotlin.time.Clock.System.now().toLocalDateTime(TimeZone.UTC)
 
-        // Persist the notification in the DB
         val notification = notificationDao.createNotification(
             userId = user.id,
             type = req.type,
