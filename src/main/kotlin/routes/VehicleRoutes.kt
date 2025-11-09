@@ -7,6 +7,9 @@ import io.ktor.http.HttpStatusCode
 import io.ktor.server.response.respond
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
+import io.ktor.server.routing.post
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.toLocalDateTime
 import kotlin.reflect.KClass
 
 class VehicleRoute(entityClass: KClass<Vehicle>, override val dao: VehicleDao) : ModelRoute<VehicleDao, Vehicle>("vehicle", entityClass) {
@@ -35,6 +38,18 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         } else {
             call.respond(available)
             call.respond(vehicles)
+        }
+    }
+
+    get("/vehicle/{timeStart}/{timeEnd}") {
+        val timeStart: LocalDateTime = LocalDateTime.parse(call.parameters["timeStart"]!!)
+        val timeEnd: LocalDateTime = LocalDateTime.parse(call.parameters["timeEnd"]!!)
+
+        val filterVehicles = VehicleDao().findByTimeAvailable(timeStart, timeEnd)
+        if (filterVehicles.isEmpty()) {
+            call.respond(HttpStatusCode.NoContent)
+        } else {
+            call.respond(filterVehicles)
         }
     }
 

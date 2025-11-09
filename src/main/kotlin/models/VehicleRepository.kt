@@ -1,14 +1,21 @@
 package com.example.models
 
+import com.example.models.RentalContractTable.vehicleId
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 interface VehicleRepository: CrudRepository<Vehicle, Long> {
     fun isAvailable(vehicleId: Long): Boolean
     fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int = 15): Double
     fun consumptionExpenses(vehicleId: Long): Double
     fun calculateYearlyKilometers(vehicleId: Long)
+    fun findByTimeAvailable(beginDate: LocalDateTime, endDate: LocalDateTime): List<Vehicle>
 }
 
 class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRepository {
@@ -56,6 +63,15 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         updateProperty(vehicle.id, "totalYearlyUsageKilometers", yearlyUsage)
     }
 
+    @OptIn(ExperimentalTime::class)
+    override fun findByTimeAvailable(
+        beginDate: LocalDateTime,
+        endDate: LocalDateTime
+    ): List<Vehicle> {
+        val vehicles: List<Vehicle> = findAll()
+        return vehicles.filter { beginDate <= it.beginAvailable &&  endDate >= it.endAvailable }
+    }
+
     // Map all the database columns to the Vehicle data class
     override fun getEntity(row: ResultRow): Vehicle {
         return Vehicle(
@@ -72,6 +88,8 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
             totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers],
             ownerId = row[VehicleTable.ownerId],
             tco = row[VehicleTable.tco],
+            beginAvailable = row[VehicleTable.beginAvailable],
+            endAvailable = row[VehicleTable.endAvailable]
         )
     }
 
@@ -90,6 +108,8 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
         statement[VehicleTable.photoPath] = entity.photoPath
         statement[VehicleTable.totalYearlyUsageKilometers] = entity.totalYearlyUsageKilometers
         statement[VehicleTable.tco] = entity.tco
+        statement[VehicleTable.beginAvailable] = entity.beginAvailable
+        statement[VehicleTable.endAvailable] = entity.endAvailable
     }
 
 }

@@ -2,6 +2,8 @@ package com.example.models
 
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 
 interface ReservationsRepository : CrudRepository<Reservations, Long> {
@@ -9,7 +11,7 @@ interface ReservationsRepository : CrudRepository<Reservations, Long> {
     fun reserveCar(reservation: Reservations)
     fun isCarReserved(vehicleId: Long): Boolean
     fun getCarReservationStatus(vehicleId: Long): String
-    fun makeCarReservable(vehicleId: Long)
+    fun makeCarReservable(vehicleId: Long, startTime: LocalDateTime, endTime: LocalDateTime)
 }
 
 class ReservationsDao :
@@ -68,8 +70,11 @@ class ReservationsDao :
         return vehicle.status.toString()
     }
 
-    override fun makeCarReservable(vehicleId: Long) {
+    override fun makeCarReservable(vehicleId: Long, startTime: LocalDateTime, endTime: LocalDateTime) {
         val vehicleDao = VehicleDao()
+        vehicleDao.findById(vehicleId) ?: throw Exception("Vehicle not found")
         vehicleDao.updateProperty(vehicleId, "status", VehicleStatus.AVAILABLE)
+        vehicleDao.updateProperty(vehicleId, "start_time", startTime)
+        vehicleDao.updateProperty(vehicleId, "end_time", endTime)
     }
 }
