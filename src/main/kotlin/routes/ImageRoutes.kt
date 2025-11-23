@@ -99,7 +99,8 @@ fun Route.imageRoutes() {
         }
 
         // Serialize to JSON string and set as information that needs to be updated in the vehicle object
-        val json: String = Json.encodeToJsonElement(savedFilePaths).toString()
+        TODO("Update vehicle object with new photo paths")
+        /*val json: String = Json.encodeToJsonElement(savedFilePaths).toString()
         val vehicle = Vehicle(
             id = 1L,
             make = "Toyota",
@@ -120,7 +121,7 @@ fun Route.imageRoutes() {
         )
 
         // Update vehicle with new photo paths
-        vehicleDao.update(vehicle)
+        vehicleDao.update(vehicle)*/
 
         // Single-file response
         if (savedFileNames.size == 1) {

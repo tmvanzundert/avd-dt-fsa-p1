@@ -1,13 +1,8 @@
 package com.example.models
 
-import com.example.models.RentalContractTable.vehicleId
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
-import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 interface VehicleRepository: CrudRepository<Vehicle, Long> {
@@ -27,7 +22,8 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
     }
 
     // Calculate the yearly Total Cost of Ownership
-    override fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int): Double {
+    override fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int,
+                                    energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int): Double {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
 
         val depreciation = purchasePrice / depreciateInYears
@@ -64,13 +60,31 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
     }
 
     @OptIn(ExperimentalTime::class)
-    override fun findByTimeAvailable(
-        beginDate: LocalDateTime,
-        endDate: LocalDateTime
-    ): List<Vehicle> {
-        val vehicles: List<Vehicle> = findAll()
-        return vehicles.filter { beginDate <= it.beginAvailable &&  endDate >= it.endAvailable }
+    override fun findByTimeAvailable(beginDate: LocalDateTime,
+        endDate: LocalDateTime): List<Vehicle> =
+        findAll().filter { beginDate <= it.beginAvailable &&  endDate >= it.endAvailable }
+
+    /*override fun findByType(vehicles: List<Vehicle>, make: String, model: String): List<Vehicle> =
+        vehicles.filter { (make == "" || it.make == make) && (model == "" || it.model == model) }
+
+    override fun findByLocation(vehicles: List<Vehicle>, longitude: String, latitude: String): List<Vehicle>{
+
     }
+
+    override fun findByRange(vehicles: List<Vehicle>, range: Int): List<Vehicle> =
+        vehicles.filter { it.range >= range }
+
+    override fun filter(beginDate: LocalDateTime, endDate: LocalDateTime, make: String, model: String,
+                        longitude: String, latitude: String, range: Int): List<Vehicle>{
+        val vehicles = findAll()
+
+        vehicles.filter { beginDate <= it.beginAvailable &&  endDate >= it.endAvailable }
+        .filter { (make == "" || it.make == make) && (model == "" || it.model == model) }
+        .filter {  }
+        .filter { range == 0 || it.range >= range }
+
+        return vehicles
+    }*/
 
     // Map all the database columns to the Vehicle data class
     override fun getEntity(row: ResultRow): Vehicle {

@@ -11,7 +11,7 @@ object ReservationTable: Table("reservations") {
     val user_id: Column<Long> = long("user_id")
     val vehicle_id: Column<Long> = long("vehicle_id")
     val rate_plan_id: Column<Long> = long("rate_plan_id")
-    val staff_id: Column<Long> = long("staff_id")
+    val renter_id: Column<Long> = long("renter_id")
     val start_at: Column<LocalDateTime> = datetime("start_at")
     val end_at: Column<LocalDateTime> = datetime("end_at")
     val status: Column<String> = varchar("status", 255)
@@ -28,7 +28,7 @@ data class Reservations(
     val user_id: Long,
     val vehicle_id: Long,
     val rate_plan_id: Long,
-    val staff_id: Long,
+    val renter_id: Long,
     val start_at: LocalDateTime,
     val end_at: LocalDateTime,
     val status: String,

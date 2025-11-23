@@ -63,7 +63,7 @@ VALUES (1, 'Standaard Plan', 100.00, 0.50, 500.00, 'Volledige restitutie tot 24 
 
 -- Insert a reservation (user 1 reserves vehicle 2, staff is user 2, pickup and dropoff at Breda Centrum)
 INSERT INTO reservations (
-    user_id, vehicle_id, rate_plan_id, staff_id, start_at, end_at, status, total_amount, pickup_location_id, dropoff_location_id
+    user_id, vehicle_id, rate_plan_id, renter_id, start_at, end_at, status, total_amount, pickup_location_id, dropoff_location_id
 ) VALUES (
     1, 1, 1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, 2, 2
 );

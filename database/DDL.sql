@@ -85,7 +85,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     user_id BIGINT,
     vehicle_id BIGINT,
     rate_plan_id BIGINT,
-    staff_id BIGINT,
+    renter_id BIGINT,
     start_at TIMESTAMP,
     end_at TIMESTAMP,
     status VARCHAR(32),
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS reservations (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE RESTRICT ON UPDATE CASCADE,
     FOREIGN KEY (rate_plan_id) REFERENCES rate_plans(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (staff_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
+    FOREIGN KEY (renter_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (pickup_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (dropoff_location_id) REFERENCES locations(id) ON DELETE SET NULL ON UPDATE CASCADE
 );

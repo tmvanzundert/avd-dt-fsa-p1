@@ -13,6 +13,7 @@ import kotlin.time.Clock
 private interface UserRepository<User, Long>: CrudRepository<User, Long> {
     fun findByUsername(username: String): User?
     fun checkPassword(password: Password): Boolean
+    fun updatePassword(id: Long, newPassword: String)
     fun hashPassword(password: String): String
     fun deleteByUsername(username: String)
     fun setCreatedAt(id: Long)
@@ -27,13 +28,13 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
         val userId = users.find { it.username == username }?.id ?: throw Exception("User not found")
         delete(userId)
     }
-
-    // Find a user by username
+    // Set the created at timestamp for a user
     override fun setCreatedAt(id: Long) {
         val currentDateTime: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         updateProperty(id, "createdAt", currentDateTime)
     }
 
+    // Find a user by username
     override fun findByUsername(username: String): User? {
         val users = findAll()
         return users.find { it.username == username }
@@ -44,6 +45,14 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
         val hash = password.hash
         val plainText = password.plainText ?: return false
         return BCrypt.checkpw(plainText, hash)
+    }
+
+    override fun updatePassword(id: Long, newPassword: String) {
+        findById(id)
+            ?: throw Exception("User not found")
+
+        val hashPassword = hashPassword(newPassword)
+        updateProperty(id, "password", hashPassword)
     }
 
     // Hash a password for secure storage

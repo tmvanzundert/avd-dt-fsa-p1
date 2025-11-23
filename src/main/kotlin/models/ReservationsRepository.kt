@@ -27,7 +27,7 @@ class ReservationsDao :
             user_id = row[ReservationTable.user_id],
             vehicle_id = row[ReservationTable.vehicle_id],
             rate_plan_id = row[ReservationTable.rate_plan_id],
-            staff_id = row[ReservationTable.staff_id],
+            renter_id = row[ReservationTable.renter_id],
             start_at = row[ReservationTable.start_at],
             end_at = row[ReservationTable.end_at],
             status = row[ReservationTable.status],
@@ -42,7 +42,7 @@ class ReservationsDao :
         statement[ReservationTable.user_id] = entity.user_id
         statement[ReservationTable.vehicle_id] = entity.vehicle_id
         statement[ReservationTable.rate_plan_id] = entity.rate_plan_id
-        statement[ReservationTable.staff_id] = entity.staff_id
+        statement[ReservationTable.renter_id] = entity.renter_id
         statement[ReservationTable.start_at] = entity.start_at
         statement[ReservationTable.end_at] = entity.end_at
         statement[ReservationTable.status] = entity.status
