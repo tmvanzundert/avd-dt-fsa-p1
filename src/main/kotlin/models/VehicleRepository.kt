@@ -35,8 +35,6 @@ class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRep
 
         val cost = depreciation + maintenance + insurance + tax + energyCost
 
-        updateProperty(vehicleId, "tco", cost)
-
         return cost
     }
 
