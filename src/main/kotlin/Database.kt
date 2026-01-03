@@ -3,7 +3,6 @@ package com.example
 import io.ktor.server.application.*
 import org.jetbrains.exposed.v1.jdbc.Database
 
-
 fun Application.configureDatabase() {
     try {
         Database.connect(
