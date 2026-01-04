@@ -110,4 +110,34 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         }
     }
 
+    post("/vehicle/{id}/location") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@post call.respondText(
+                "Invalid or missing vehicle ID",
+                status = HttpStatusCode.BadRequest,
+            )
+
+        // Ensure vehicle exists before updating.
+        vehicleDao.findById(id) ?: return@post call.respondText(
+            "Vehicle with id='$id' not found",
+            status = HttpStatusCode.NotFound,
+        )
+
+        val body = try {
+            call.receive<VehicleLocation>()
+        } catch (_: Exception) {
+            return@post call.respondText(
+                "Invalid request body. Expected JSON with 'longitude' and 'latitude'.",
+                status = HttpStatusCode.BadRequest,
+            )
+        }
+
+        vehicleDao.setLocation(id, body.longitude, body.latitude)
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Vehicle $id location updated to (${body.longitude}, ${body.latitude})"
+        )
+    }
+
 }
