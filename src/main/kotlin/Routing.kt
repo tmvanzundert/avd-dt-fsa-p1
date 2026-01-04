@@ -47,15 +47,15 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
         post("/signup") {
 
             // Set the User from the request and throw error if not all fields are filled in
-            var user: User
-            try {
+            val user: User = try {
                 // Receive username and password
-                val requestData: SignupRequest = call.receive<SignupRequest>()
-                user = requestData.toUser(userDao)
-            }
-            catch (e: Exception) {
+                val requestData: SignupRequest = call.receive()
+                requestData.toUser(userDao)
+            } catch (e: Exception) {
                 val allowedProperties: List<String> = SignupRequest::class.memberProperties.map { it.name }
-                return@post call.respondText("Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e")
+                return@post call.respondText(
+                    "Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e"
+                )
             }
 
             // Check if username exists
@@ -66,13 +66,13 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             // Create the user with the data from the request
             try {
                 userDao.create(user)
-                // userDao.create((requestData))
             } catch (e: Exception) {
-                call.respondText("$e")
+                return@post call.respondText("$e")
             }
 
-            // Return the response that the user has been created
-            return@post call.respond(mapOf("response" to "User ${user.username} has been created"))
+            // Generate JWT token for the new user and return it
+            val token = generateToken(config = jwtConfig, username = user.username)
+            return@post call.respond(mapOf("token" to token))
         }
 
         post("/login") {
