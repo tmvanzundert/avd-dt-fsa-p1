@@ -1,7 +1,13 @@
 package com.example.models
 
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import java.time.ZoneId
+import kotlin.math.ceil
+import kotlin.math.max
 
 interface PaymentsRepository : CrudRepository<Payment, Long> {
 
@@ -19,6 +25,8 @@ interface PaymentsRepository : CrudRepository<Payment, Long> {
     fun capturePayment(paymentId: Long): Payment
 
     fun refundPayment(paymentId: Long): Payment
+
+    fun calculateTotalAmount(reservationId: Long, startAt: LocalDateTime): Double
 }
 
 class PaymentsDao :
@@ -80,5 +88,37 @@ class PaymentsDao :
         val payment = findById(paymentId) ?: throw Exception("Payment not found")
         updateProperty(paymentId, "status", PaymentStatus.REFUNDED)
         return payment.copy(status = PaymentStatus.REFUNDED)
+    }
+
+    override fun calculateTotalAmount(
+        reservationId: Long,
+        startAt: LocalDateTime,
+    ): Double {
+        val reservation = ReservationsDao().findById(reservationId)
+            ?: throw Exception("Reservation not found")
+
+        val vehicleId = reservation.vehicleId
+            ?: throw Exception("Vehicle ID not found in reservation")
+
+        val pricePerHour = VehicleDao().findById(vehicleId)
+            ?.pricePerDay
+            ?.div(24.0)
+            ?: 0.0
+
+        val tz = TimeZone.currentSystemDefault()
+        val zoneId = ZoneId.of(tz.id)
+
+        // Use java.time for timestamp math to avoid deprecated/experimental kotlinx.datetime Instant APIs.
+        val startMillis = startAt.toJavaLocalDateTime().atZone(zoneId).toInstant().toEpochMilli()
+        val endMillis = (reservation.endAt ?: startAt)
+            .toJavaLocalDateTime()
+            .atZone(zoneId)
+            .toInstant()
+            .toEpochMilli()
+
+        val elapsedMillis = (endMillis - startMillis).coerceAtLeast(0L)
+        val durationHours = max(1, ceil(elapsedMillis / 3_600_000.0).toInt())
+
+        return durationHours * pricePerHour
     }
 }

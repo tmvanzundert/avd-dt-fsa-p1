@@ -34,6 +34,7 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:3.5.6")
     implementation("org.mindrot:jbcrypt:0.4")
     implementation("io.ktor:ktor-server-content-negotiation:${ktor_version}")
+    implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.7.1")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
     testImplementation("io.ktor:ktor-server-test-host-jvm:3.3.0")

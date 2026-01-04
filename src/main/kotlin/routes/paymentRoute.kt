@@ -4,6 +4,7 @@ import com.example.models.Payment
 import com.example.models.PaymentProvider
 import com.example.models.PaymentStatus
 import com.example.models.PaymentsDao
+import com.example.models.ReservationsDao
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -22,22 +23,54 @@ class PaymentRoute(
 data class CreatePaymentRequest(
     val reservationId: Long,
     val amount: Double,
-    /** DDL: CHAR(3) */
     val currency: String,
-    /** DDL: ENUM('STRIPE','PAYPAL','IDEAL','BANCONTACT') */
     val provider: PaymentProvider,
     val deposit: Double? = null,
+)
+
+@Serializable
+data class CalcTotalAmountRequest(
+    val reservationId: Long,
+    val startAt: String? = null,
+)
+
+@Serializable
+data class CalcTotalAmountResponse(
+    val reservationId: Long,
+    val totalAmount: Double,
 )
 
 fun Route.paymentRoutes(paymentsDao: PaymentsDao) {
     val paymentRoute = PaymentRoute(Payment::class, paymentsDao)
 
     paymentRoute.apply {
-        list()      // GET   /payment
-        getById()   // GET   /payment/{id}
-        create()    // POST  /payment
-        update()    // PUT   /payment/{id}
-        delete()    // DELETE /payment/{id}
+        list()
+        getById()
+        create()
+        update()
+        delete()
+    }
+
+    // Create a new payment, deposit
+    post("/payment/deposit") {
+        val body = call.receive<CreatePaymentRequest>()
+
+        val payment = paymentsDao.createPayment(
+            reservationId = body.reservationId,
+            amount = body.amount,
+            currency = body.currency,
+            provider = body.provider,
+            status = PaymentStatus.AUTHORIZED,
+            deposit = body.deposit,
+        )
+
+        call.respond(payment)
+    }
+
+    // Total cost is calculated at the end of the renting period, if reservation status is COMPLETED, calculate total cost and create payment
+    // accepts a date range, creates a payment for the total amount
+    post("/payment/complete") {
+
     }
 
     post("/payment/create") {
@@ -55,7 +88,6 @@ fun Route.paymentRoutes(paymentsDao: PaymentsDao) {
         call.respond(payment)
     }
 
-    // Capture a payment (DDL has no captured_at, so we only flip status)
     post("/payment/{id}/capture") {
         val id = call.parameters["id"]?.toLongOrNull()
             ?: return@post call.respondText(
@@ -67,7 +99,6 @@ fun Route.paymentRoutes(paymentsDao: PaymentsDao) {
         call.respond(updated)
     }
 
-    // Refund a payment (DDL has no refunded_at, so we only flip status)
     post("/payment/{id}/refund") {
         val id = call.parameters["id"]?.toLongOrNull()
             ?: return@post call.respondText(
@@ -94,5 +125,38 @@ fun Route.paymentRoutes(paymentsDao: PaymentsDao) {
         } else {
             call.respond(payments)
         }
+    }
+
+    // TEMPORARY: debug endpoint to verify the total-amount calculation over HTTP.
+    // Remove once a proper payment completion flow exists.
+    post("/payment/_debug/calc-total") {
+        val body = call.receive<CalcTotalAmountRequest>()
+
+        val reservation = ReservationsDao().findById(body.reservationId)
+            ?: return@post call.respondText(
+                "Reservation not found",
+                status = io.ktor.http.HttpStatusCode.NotFound
+            )
+
+        val startAt = when {
+            body.startAt != null -> {
+                try {
+                    kotlinx.datetime.LocalDateTime.parse(body.startAt)
+                } catch (e: Exception) {
+                    return@post call.respondText(
+                        "Invalid startAt; expected ISO-8601 LocalDateTime (e.g. 2026-01-04T10:00:00). Error: ${'$'}e",
+                        status = io.ktor.http.HttpStatusCode.BadRequest
+                    )
+                }
+            }
+            reservation.startAt != null -> reservation.startAt
+            else -> return@post call.respondText(
+                "Reservation startAt is missing",
+                status = io.ktor.http.HttpStatusCode.BadRequest
+            )
+        }
+
+        val total = paymentsDao.calculateTotalAmount(body.reservationId, startAt)
+        call.respond(CalcTotalAmountResponse(body.reservationId, total))
     }
 }

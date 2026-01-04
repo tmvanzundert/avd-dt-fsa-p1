@@ -1,5 +1,6 @@
 package com.example.routes
 
+import com.example.models.ReservationStatus
 import com.example.models.Reservations
 import com.example.models.ReservationsDao
 import com.example.models.User
@@ -84,6 +85,42 @@ fun Route.reservationsRoutes(
         call.respond(
             HttpStatusCode.OK,
             "Reservation $id has been canceled"
+        )
+    }
+
+    post("/reservation/myhistory/{userId}") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing user ID"
+            )
+
+        val vehicles = reservationsDao.getVehicleReservations(userId, listOf(
+            ReservationStatus.CANCELLED,
+            ReservationStatus.COMPLETED
+        ))
+
+        call.respond(
+            HttpStatusCode.OK,
+            vehicles
+        )
+    }
+
+    post("/reservation/myrentals/{userId}") {
+        val userId = call.parameters["userId"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing user ID"
+            )
+
+        val vehicles = reservationsDao.getVehicleReservations(userId, listOf(
+            ReservationStatus.PENDING,
+            ReservationStatus.CONFIRMED
+        ))
+
+        call.respond(
+            status = HttpStatusCode.OK,
+            message = vehicles
         )
     }
 }
