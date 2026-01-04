@@ -4,16 +4,34 @@ import com.example.models.Vehicle
 import com.example.models.VehicleDao
 import com.example.models.VehicleStatus
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.receive
 import io.ktor.server.response.respond
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Route
 import io.ktor.server.routing.get
 import io.ktor.server.routing.post
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 class VehicleRoute(entityClass: KClass<Vehicle>, override val dao: VehicleDao) : ModelRoute<VehicleDao, Vehicle>("vehicle", entityClass) {
 
 }
+
+@Serializable
+data class VehicleLocation(
+    val longitude: Double,
+    val latitude: Double,
+)
+
+@Serializable
+data class ChangeVehicleStatusRequest(
+    val status: VehicleStatus,
+    /** Optional: only meaningful when setting status to AVAILABLE in current domain model. */
+    val beginAvailable: LocalDateTime? = null,
+    /** Optional: only meaningful when setting status to AVAILABLE in current domain model. */
+    val endAvailable: LocalDateTime? = null,
+)
 
 fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
     val vehicleRoute = VehicleRoute(Vehicle::class, vehicleDao)
@@ -26,17 +44,57 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         delete()
     }
 
+    /**
+     * Change vehicle status.
+     *
+     * POST /vehicle/{id}/status
+     * Body:
+     * { "status": "AVAILABLE", "beginAvailable": "2026-01-04T10:00", "endAvailable": "2026-01-04T18:00" }
+     */
+    post("/vehicle/{id}/status") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@post call.respondText(
+                "Invalid or missing vehicle ID",
+                status = HttpStatusCode.BadRequest,
+            )
+
+        // Ensure vehicle exists before updating.
+        vehicleDao.findById(id) ?: return@post call.respondText(
+            "Vehicle with id='$id' not found",
+            status = HttpStatusCode.NotFound,
+        )
+
+        val body = try {
+            call.receive<ChangeVehicleStatusRequest>()
+        } catch (_: Exception) {
+            return@post call.respondText(
+                "Invalid request body. Expected JSON with at least 'status'.",
+                status = HttpStatusCode.BadRequest,
+            )
+        }
+
+        // Always update the status.
+        vehicleDao.updateProperty(id, "status", body.status)
+
+        // Optionally update availability window when provided.
+        // We only persist the fields that are non-null to avoid accidentally wiping values.
+        body.beginAvailable?.let { vehicleDao.updateProperty(id, "beginAvailable", it) }
+        body.endAvailable?.let { vehicleDao.updateProperty(id, "endAvailable", it) }
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Vehicle $id status updated to ${body.status}"
+        )
+    }
+
     get("/vehicle/available") {
         val vehicles = vehicleDao.findAll()
         val available = vehicles.filter { it.status == VehicleStatus.AVAILABLE }
-        println("Current vehicles: $vehicles")
-        println("Available vehicles: $available")
 
         if (available.isEmpty()) {
             call.respond(HttpStatusCode.NoContent)
         } else {
             call.respond(available)
-            call.respond(vehicles)
         }
     }
 
@@ -44,32 +102,12 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         val timeStart: LocalDateTime = LocalDateTime.parse(call.parameters["timeStart"]!!)
         val timeEnd: LocalDateTime = LocalDateTime.parse(call.parameters["timeEnd"]!!)
 
-        val filterVehicles = VehicleDao().findByTimeAvailable(timeStart, timeEnd)
+        val filterVehicles = vehicleDao.findByTimeAvailable(timeStart, timeEnd)
         if (filterVehicles.isEmpty()) {
             call.respond(HttpStatusCode.NoContent)
         } else {
             call.respond(filterVehicles)
         }
-    }
-
-    get("/vehicle/available/{id}/{timeStart}/{timeEnd}") {
-        val id: Long = (call.parameters["id"]?.toLongOrNull()
-            ?: call.respond(
-                HttpStatusCode.BadRequest,
-                "Invalid or missing vehicle ID"
-            )) as Long
-
-        val timeStart: LocalDateTime = LocalDateTime.parse(call.parameters["timeStart"]!!)
-        val timeEnd: LocalDateTime = LocalDateTime.parse(call.parameters["timeEnd"]!!)
-
-        vehicleDao.updateProperty(id, "status", VehicleStatus.AVAILABLE)
-        vehicleDao.updateProperty(id, "beginAvailable", timeStart)
-        vehicleDao.updateProperty(id, "endAvailable", timeEnd)
-
-        call.respond(
-            HttpStatusCode.OK,
-            "Vehicle $id is now available"
-        )
     }
 
 }

@@ -1,19 +1,37 @@
 package com.example.routes
 
+import com.example.models.Reservations
 import com.example.models.ReservationsDao
+import com.example.models.User
 import com.example.models.UserDao
+import com.example.models.VehicleDao
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
+import kotlin.reflect.KClass
+
+class ReservationsRoute(entityClass: KClass<Reservations>, override val dao: ReservationsDao) : ModelRoute<ReservationsDao, Reservations>("user", entityClass) {
+
+}
 
 fun Route.reservationsRoutes(
-    userDao: UserDao,
     reservationsDao: ReservationsDao,
+    userDao: UserDao,
 
 ) {
+    val reservationRoute = ReservationsRoute(Reservations::class, reservationsDao)
+
+    reservationRoute.apply {
+        list()
+        getById()
+        create()
+        update()
+        delete()
+    }
+
     post("/reservation") {
         val request = call.receive<CreateReservationRequest>()
 
@@ -51,6 +69,21 @@ fun Route.reservationsRoutes(
         call.respond(
             HttpStatusCode.OK,
             "Reservation $id updated with begin time $startTime and end time $endTime"
+        )
+    }
+
+    post("/reservation/cancel/{id}") {
+        val id = call.parameters["id"]?.toLongOrNull()
+            ?: return@post call.respond(
+                HttpStatusCode.BadRequest,
+                "Invalid or missing reservation ID"
+            )
+
+        ReservationsDao().cancelReservation(id)
+
+        call.respond(
+            HttpStatusCode.OK,
+            "Reservation $id has been canceled"
         )
     }
 }

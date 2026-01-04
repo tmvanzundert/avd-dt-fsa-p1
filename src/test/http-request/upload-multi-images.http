@@ -29,23 +29,16 @@ Authorization: Bearer {{bearerToken}}
 
 {
   "id": 100,
-  "make": "Toyota",
-  "model": "Corolla",
-  "year": 2020,
-  "category": "Sedan",
-  "seats": 5,
   "range": 600.0,
   "licensePlate": "ABC1234",
   "status": "AVAILABLE",
   "location": 1,
   "ownerId": 1,
   "photoPath": "/path/to/photo.jpg",
-  "totalYearlyUsageKilometers": 0,
-  "tco": 0.0
 }
 
 ### Upload multiple images for car
-POST http://localhost:8085/upload/cars/100
+POST http://localhost:8085/upload/vehicles/1
 Content-Type: multipart/form-data; boundary=WebAppBoundary
 Authorization: Bearer {{bearerToken}}
 

@@ -1,13 +1,12 @@
 package com.example.models
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
-import kotlin.time.ExperimentalTime
 import org.jetbrains.exposed.v1.core.*
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
 import org.mindrot.jbcrypt.BCrypt
-import kotlin.time.Clock
 
 // Implement these functions in the User DAO
 private interface UserRepository<User, Long>: CrudRepository<User, Long> {
@@ -18,7 +17,6 @@ private interface UserRepository<User, Long>: CrudRepository<User, Long> {
     fun setCreatedAt(id: Long)
 }
 
-@OptIn(ExperimentalTime::class)
 class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, Long> {
 
     // Delete a user by username
@@ -52,7 +50,7 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
         return BCrypt.hashpw(password, salt)
     }
 
-    // Map all the database columns to the Vehicle data class
+    // Map all the database columns to the User data class
     override fun getEntity(row: ResultRow): User {
         return User(
             id = row[UserTable.id],
@@ -67,7 +65,8 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
             rating = row[UserTable.rating],
             createdAt = row[UserTable.createdAt],
             birthDate = row[UserTable.birthDate],
-            driverLicenseNumber = row[UserTable.driverLicenseNumber]
+            driverLicenseNumber = row[UserTable.driverLicenseNumber],
+            avatarPath = row[UserTable.avatarPath],
         )
     }
 
@@ -86,6 +85,7 @@ class UserDao: CrudDAO<User, Long, UserTable>(UserTable), UserRepository<User, L
         statement[UserTable.createdAt] = entity.createdAt
         statement[UserTable.birthDate] = entity.birthDate
         statement[UserTable.driverLicenseNumber] = entity.driverLicenseNumber
+        statement[UserTable.avatarPath] = entity.avatarPath
     }
 
 }
