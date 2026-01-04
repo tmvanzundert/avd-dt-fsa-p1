@@ -100,7 +100,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             imageRoutes()
             userRoutes(userDao)
             vehicleRoutes(vehicleDao)
-            reservationsRoutes(userDao, reservationsDao)
+            reservationsRoutes(reservationsDao, userDao)
             paymentRoutes(paymentsDao)
         }
     }
