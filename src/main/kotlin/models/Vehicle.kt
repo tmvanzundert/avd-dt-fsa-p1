@@ -1,51 +1,54 @@
 package com.example.models
 
+import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
-import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.datetime.datetime
-import kotlin.time.ExperimentalTime
-import kotlinx.datetime.LocalDateTime
 
 object VehicleTable : Table("vehicles") {
     val id: Column<Long> = long("id").autoIncrement()
-    val make: Column<String> = varchar("make", 50)
-    val model: Column<String> = varchar("model", 50)
-    val year: Column<Int> = integer("year")
-    val category: Column<String> = varchar("category", 50)
-    val seats: Column<Int> = integer("seats")
-    val range: Column<Double> = double("range_km")
-    val licensePlate: Column<String> = varchar("license_plate", 20)
-    val status: Column<VehicleStatus> = enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
-    val location: Column<Long> = long("location_id")
-    val ownerId: Column<Long> = long("owner_user_id")
-    val photoPath: Column<String> = text("photo_path").clientDefault { "[]" }
-    val totalYearlyUsageKilometers: Column<Long> = long("total_yearly_kilometers")
-    val tco: Column<Double?> = double("tco").default(0.0) as Column<Double?>
-    val beginAvailable: Column<LocalDateTime> = datetime("begin_available")
-    val endAvailable: Column<LocalDateTime> = datetime("end_available")
+
+    // DDL: range_km INT
+    val rangeKm: Column<Int?> = integer("range_km").nullable()
+
+    val licensePlate: Column<String> = varchar("license_plate", 32).uniqueIndex()
+
+    val status: Column<VehicleStatus> =
+        enumerationByName("status", 20, VehicleStatus::class).default(VehicleStatus.AVAILABLE)
+
+    // DDL: longitude/latitude DECIMAL(10,7)
+    val longitude: Column<Double?> = double("longitude").nullable()
+    val latitude: Column<Double?> = double("latitude").nullable()
+
+    // DDL: owner_user_id BIGINT NULL, ON DELETE SET NULL
+    val ownerId: Column<Long?> = long("owner_user_id").nullable()
+
+    // DDL: begin_available/end_available TIMESTAMP (nullable by default)
+    val beginAvailable: Column<LocalDateTime?> = datetime("begin_available").nullable()
+    val endAvailable: Column<LocalDateTime?> = datetime("end_available").nullable()
+
+    // DDL: price_per_day DECIMAL(10,2)
+    val pricePerDay: Column<Double?> = double("price_per_day").nullable()
+
+    val photoPath: Column<String?> = varchar("photo_path", 255).nullable()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
 @Serializable
-data class Vehicle @OptIn(ExperimentalTime::class) constructor(
+data class Vehicle(
     val id: Long = 0L,
-    val make: String,
-    val model: String,
-    val year: Int,
-    val category: String,
-    val seats: Int,
-    val range: Double,
+    val rangeKm: Int? = null,
     val licensePlate: String,
     val status: VehicleStatus = VehicleStatus.AVAILABLE,
-    val location: Long,
-    val ownerId: Long,
-    val photoPath: String = "[]",
-    val totalYearlyUsageKilometers: Long = 0,
-    val tco: Double?,
-    val beginAvailable: LocalDateTime,
-    val endAvailable: LocalDateTime
+    val longitude: Double? = null,
+    val latitude: Double? = null,
+    val ownerId: Long? = null,
+    val beginAvailable: LocalDateTime? = null,
+    val endAvailable: LocalDateTime? = null,
+    val pricePerDay: Double? = null,
+    val photoPath: String? = null,
 )
 
 @Serializable

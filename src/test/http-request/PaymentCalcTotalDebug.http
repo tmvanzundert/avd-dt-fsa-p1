@@ -1,0 +1,43 @@
+### Login (get JWT)
+POST http://127.0.0.1:8085/login
+Content-Type: application/json
+
+{
+  "username": "tamara",
+  "password": "12345"
+}
+
+> {%
+client.global.set("token", response.body.token);
+client.global.set("userId", response.body.userId);
+client.test("login returns token", function() {
+  client.assert(!!client.global.get("token"), "token missing from login response");
+});
+client.test("login returns userId", function() {
+  client.assert(!!client.global.get("userId"), "userId missing from login response");
+});
+%}
+
+### TEMP: calculate total amount for a reservation
+# Preconditions:
+# - server is running on :8085
+# - reservationId exists in DB and has vehicleId + (ideally) endAt set
+POST http://127.0.0.1:8085/payment/_debug/calc-total
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "reservationId": 1
+}
+
+> {%
+client.test("status is 200", function() {
+  client.assert(response.status === 200, "Expected 200 but got " + response.status);
+});
+
+client.test("response shape", function() {
+  client.assert(response.body.reservationId == 1, "reservationId mismatch");
+  client.assert(typeof response.body.totalAmount === "number", "totalAmount should be a number");
+  client.assert(response.body.totalAmount >= 0, "totalAmount should be non-negative");
+});
+%}

@@ -1,69 +1,56 @@
 USE plugandplay;
 
--- Insert locations that are referenced
-INSERT INTO locations (name, address) VALUES
-('Breda', 'Stationsplein 1, 4811 BB Breda'),
-('Breda', 'Grote Markt 38, 4811 XS Breda'),
-('Amsterdam', 'Haagweg 334, 4813 XE Amsterdam');
-
 -- Insert users
 INSERT INTO users (
+    id,
     first_name,
     last_name,
     username,
-    address,
-    role,
-    phone,
     password,
     email,
     rating,
+    phone,
+    role,
     created_at,
     birth_date,
-    driver_license_number
+    driver_license_number,
+    address,
+    avatar_path
 )
 VALUES
-('John', 'Doe', 'johndoe', 'Stationsplein 1, 4811 BB Breda', 'CUSTOMER', '0612345678', 'hashedpassword123', 'johndoe@example.com', 4.5, NOW(), '1990-01-01', 'D1234567890'),
-('Sanne', 'Jansen', 'sannej', 'Grote Markt 38, 4811 XS Breda', 'CUSTOMER', '0623456789', 'hashedpassword456', 'sannej@example.com', 4.8, NOW(), '1985-05-15', 'J9876543210'),
-('Pieter', 'de Vries', 'pieterv', 'Haagweg 334, 4813 XE Amsterdam', 'CUSTOMER', '0634567890', 'hashedpassword789', 'pieterv@example.com', 4.7, NOW(), '1992-09-21', 'V1122334455');
+(1, 'Henk', 'de Vries', 'hdevries', '$2a$10$ouC/BX19GxcB6NTgOKpXjejWWyiZfEpqM7mrR/iFniAiJH2WETHGK', 'hdevries@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Markendaalseweg 131, 4811 KW Breda', NULL),
+(2, 'Sanne', 'van den Broek', 'svdbroek', '$2a$10$8FFMYG12cQNryzEmrQrptO/ULm7699GE4QRBDwAV5O/ctV2cUVkva', 'svdbroek@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Fellenoordstraat 97, 4811 TH Breda', NULL),
+(3, 'John', 'Halsema', 'jhalsema', '$2a$10$G6mXAVwycEvBnAtC8dCOyOfT3CrR6UTqEPS7Cd3Xjve1FTPixIj7m', 'jhalsema@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Eindstraat 15-17, 4811 KK Breda', NULL);
 
 -- Insert vehicles
 INSERT INTO vehicles (
-    make,
-    model,
-    year,
-    category,
-    seats,
     range_km,
     license_plate,
-    location_id,
+    status,
+    longitude,
+    latitude,
     owner_user_id,
-    photo_path,
-    total_yearly_kilometers,
     begin_available,
-    end_available
+    end_available,
+    price_per_day,
+    photo_path
 )
 VALUES
-('Toyota', 'Corolla', 2020, 'Sedan', 5, 600, 'NL-BR-01', 1, 1, "[]", 123456, "2020-01-01T00:00:00", "2020-12-31T00:00:00"),
-('Volkswagen', 'Golf', 2021, 'Hatchback', 5, 650, 'NL-BR-02', 2, 2, "[]", 123456, "2021-01-01T00:00:00", "2021-12-31T00:00:00"),
-('Tesla', 'Model 3', 2022, 'Electric', 5, 400, 'NL-BR-03', 3, 3, "[]", 123456, "2022-01-01T00:00:00", "2022-12-31T00:00:00");
+    (491, '1XZL27', 'AVAILABLE', 4.78090, 51.58710, 1, '2026-01-01 00:00:00', '2026-01-13 00:00:00', 80.00, '[]'),
+    (533, 'KK596K', 'AVAILABLE', 4.79910, 51.58810, 2, '2026-01-10 00:00:00', '2026-01-16 00:00:00', 90.00, '[]'),
+    (455, 'NG431D', 'AVAILABLE', 4.82550, 51.59030, 3, '2026-01-20 00:00:00', '2026-01-31 00:00:00', 70.00, '[]');
 
-INSERT INTO  rental_contracts (
-    vehicle_id,
-    pickup_odometer,
-    dropoff_odometer,
-    pickup_time,
-    return_time,
-    signed_at
-)
-VALUES (1, 123456, 123459, '2025-11-02 10:00:00', '2025-11-04 10:00:00', '2025-11-01 10:00:00');
 
--- Insert a rate plan
-INSERT INTO rate_plans (rental_contract_id, name, price_per_day, price_per_km, deposit, cancellation_policy)
-VALUES (1, 'Standaard Plan', 100.00, 0.50, 500.00, 'Volledige restitutie tot 24 uur voor aanvang');
-
--- Insert a reservation (user 1 reserves vehicle 2, staff is user 2, pickup and dropoff at Breda Centrum)
+-- Insert a reservation
 INSERT INTO reservations (
-    user_id, vehicle_id, rate_plan_id, staff_id, start_at, end_at, status, total_amount, pickup_location_id, dropoff_location_id
+    user_id,
+    vehicle_id,
+    start_at,
+    end_at,
+    status,
+    total_amount,
+    photo_vehicle_before,
+    photo_vehicle_after
 ) VALUES (
-    1, 1, 1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, 2, 2
+    1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, NULL, NULL
 );

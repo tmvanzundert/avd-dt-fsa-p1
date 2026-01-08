@@ -8,31 +8,45 @@ import org.jetbrains.exposed.v1.datetime.datetime
 
 object ReservationTable: Table("reservations") {
     val id: Column<Long> = long("id").autoIncrement()
-    val user_id: Column<Long> = long("user_id")
-    val vehicle_id: Column<Long> = long("vehicle_id")
-    val rate_plan_id: Column<Long> = long("rate_plan_id")
-    val staff_id: Column<Long> = long("staff_id")
-    val start_at: Column<LocalDateTime> = datetime("start_at")
-    val end_at: Column<LocalDateTime> = datetime("end_at")
-    val status: Column<String> = varchar("status", 255)
-    val total_amount: Column<Double> = double("total_amount")
-    val pickup_location_id: Column<Long> = long("pickup_location_id")
-    val dropoff_location_id: Column<Long> = long("dropoff_location_id")
+
+    // DDL: user_id BIGINT NULL, ON DELETE SET NULL
+    val userId: Column<Long?> = long("user_id").nullable()
+
+    // DDL: vehicle_id BIGINT (RESTRICT)
+    val vehicleId: Column<Long?> = long("vehicle_id").nullable()
+
+    val startAt: Column<LocalDateTime?> = datetime("start_at").nullable()
+    val endAt: Column<LocalDateTime?> = datetime("end_at").nullable()
+
+    val status: Column<ReservationStatus> =
+        enumerationByName("status", 20, ReservationStatus::class).default(ReservationStatus.PENDING)
+
+    // DDL: DECIMAL(12,2)
+    val totalAmount: Column<Double?> = double("total_amount").nullable()
+
+    val photoVehicleBefore: Column<String?> = varchar("photo_vehicle_before", 255).nullable()
+    val photoVehicleAfter: Column<String?> = varchar("photo_vehicle_after", 255).nullable()
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
 @Serializable
 data class Reservations(
-    val id: Long,
-    val user_id: Long,
-    val vehicle_id: Long,
-    val rate_plan_id: Long,
-    val staff_id: Long,
-    val start_at: LocalDateTime,
-    val end_at: LocalDateTime,
-    val status: String,
-    val total_amount: Double,
-    val pickup_location_id: Long,
-    val dropoff_location_id: Long,
+    val id: Long = 0L,
+    val userId: Long? = null,
+    val vehicleId: Long? = null,
+    val startAt: LocalDateTime? = null,
+    val endAt: LocalDateTime? = null,
+    val status: ReservationStatus = ReservationStatus.PENDING,
+    val totalAmount: Double? = null,
+    val photoVehicleBefore: String? = null,
+    val photoVehicleAfter: String? = null,
 )
+
+@Serializable
+enum class ReservationStatus {
+    PENDING,
+    CONFIRMED,
+    CANCELLED,
+    COMPLETED,
+}

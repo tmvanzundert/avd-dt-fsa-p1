@@ -20,14 +20,17 @@ Content-Type: application/json
   "password": "userroutingtestpass"
 }
 
-> {% client.global.set("bearerToken", response.body.token); %}
+> {%
+  client.global.set("bearerToken", response.body.token);
+  client.global.set("userId", response.body.userId);
+%}
 
 ### Get all users
 GET http://localhost:8085/user
 Authorization: Bearer {{bearerToken}}
 
 ### Get user by ID
-GET http://localhost:8085/user/1
+GET http://localhost:8085/user/{{userId}}
 Authorization: Bearer {{bearerToken}}
 
 ### Create user

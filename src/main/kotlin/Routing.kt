@@ -34,28 +34,32 @@ fun SignupRequest.toUser(userDao: UserDao): User {
 @Serializable
 data class LoginRequest(val username: String, val password: String)
 
+@Serializable
+data class AuthResponse(
+    val token: String,
+    val userId: Long
+)
+
 fun Application.configureRouting(jwtConfig: JWTConfig) {
     val userDao = UserDao()
     val vehicleDao = VehicleDao()
     val reservationsDao = ReservationsDao()
-    val notificationDao = NotificationDao()
     val paymentsDao = PaymentsDao()
-    val locationDao = LocationDao()
 
     routing {
 
         post("/signup") {
 
             // Set the User from the request and throw error if not all fields are filled in
-            var user: User
-            try {
+            val user: User = try {
                 // Receive username and password
-                val requestData: SignupRequest = call.receive<SignupRequest>()
-                user = requestData.toUser(userDao)
-            }
-            catch (e: Exception) {
+                val requestData: SignupRequest = call.receive()
+                requestData.toUser(userDao)
+            } catch (e: Exception) {
                 val allowedProperties: List<String> = SignupRequest::class.memberProperties.map { it.name }
-                return@post call.respondText("Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e")
+                return@post call.respondText(
+                    "Failed to create the new user. Make sure to at least use the properties in $allowedProperties. Error details: $e"
+                )
             }
 
             // Check if username exists
@@ -66,13 +70,17 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             // Create the user with the data from the request
             try {
                 userDao.create(user)
-                // userDao.create((requestData))
             } catch (e: Exception) {
-                call.respondText("$e")
+                return@post call.respondText("$e")
             }
 
-            // Return the response that the user has been created
-            return@post call.respond(mapOf("response" to "User ${user.username} has been created"))
+            // Fetch created user so we can return its id
+            val createdUser = userDao.findByUsername(user.username)
+                ?: return@post call.respondText("Failed to create user")
+
+            // Generate JWT token for the new user and return it
+            val token = generateToken(config = jwtConfig, username = createdUser.username)
+            return@post call.respond(AuthResponse(token = token, userId = createdUser.id))
         }
 
         post("/login") {
@@ -95,17 +103,15 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
 
             // Generate the JWT token and return to the request
             val token = generateToken(config = jwtConfig, username = username)
-            return@post call.respond(mapOf("token" to token))
+            return@post call.respond(AuthResponse(token = token, userId = findUser.id))
         }
 
         authenticate("jwt-auth") {
             imageRoutes()
             userRoutes(userDao)
             vehicleRoutes(vehicleDao)
-            reservationsRoutes(userDao, reservationsDao)
-            notificationRoutes(userDao, notificationDao)
+            reservationsRoutes(reservationsDao, userDao)
             paymentRoutes(paymentsDao)
-            locationRoutes(locationDao, vehicleDao)
         }
     }
 }

@@ -1,32 +1,43 @@
 package com.example.models
 
-import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.Serializable
 import org.jetbrains.exposed.v1.core.Column
 import org.jetbrains.exposed.v1.core.Table
-import org.jetbrains.exposed.v1.datetime.datetime
 
-object PaymentsTable: Table("Payment") {
+object PaymentsTable : Table("payments") {
     val id: Column<Long> = long("id").autoIncrement()
-    val reservation: Column<Long> = long("reservation")
-    val amount: Column<Double> = double("amount")
-    val currency: Column<Char> = char("currency")
-    val provider: Column<String> = varchar("provider_name", 40)
-    val status: Column<String> = varchar("status", 32)
-    val authorized_at: Column<LocalDateTime> = datetime("authorized_at")
-    val captured_at: Column<LocalDateTime> = datetime("captured_at")
-    val refunded_at: Column<LocalDateTime> = datetime("refunded_at")
-
+    val reservationId: Column<Long?> = long("reservation_id").nullable()
+    val amount: Column<Double?> = double("amount").nullable()
+    val currency: Column<String?> = char("currency", 3).nullable()
+    val provider: Column<PaymentProvider?> = enumerationByName("provider", 20, PaymentProvider::class).nullable()
+    val status: Column<PaymentStatus> = enumerationByName("status", 20, PaymentStatus::class).default(PaymentStatus.AUTHORIZED)
+    val deposit: Column<Double?> = double("deposit").nullable()
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
 
+@Serializable
 data class Payment(
-    val id: Long,
-    val reservation_id: Long,
-    val amount: Double,
-    val currency: Char,
-    val provider: String,
-    val status: String,
-    val authorized_at: LocalDateTime,
-    val captured_at: LocalDateTime,
-    val refunded_at: LocalDateTime
+    val id: Long = 0L,
+    val reservationId: Long? = null,
+    val amount: Double? = null,
+    val currency: String? = null,
+    val provider: PaymentProvider? = null,
+    val status: PaymentStatus = PaymentStatus.AUTHORIZED,
+    val deposit: Double? = null,
 )
+
+@Serializable
+enum class PaymentProvider {
+    STRIPE,
+    PAYPAL,
+    IDEAL,
+    BANCONTACT,
+}
+
+@Serializable
+enum class PaymentStatus {
+    AUTHORIZED,
+    CAPTURED,
+    REFUNDED,
+    FAILED,
+}

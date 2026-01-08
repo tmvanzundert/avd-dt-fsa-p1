@@ -1,8 +1,13 @@
 package com.example.models
 
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
 import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
+import java.time.ZoneId
+import kotlin.math.ceil
+import kotlin.math.max
 
 interface PaymentsRepository : CrudRepository<Payment, Long> {
 
@@ -11,17 +16,17 @@ interface PaymentsRepository : CrudRepository<Payment, Long> {
     fun createPayment(
         reservationId: Long,
         amount: Double,
-        currency: Char,
-        provider: String,
-        status: String = "AUTHORIZED",
-        authorizedAt: LocalDateTime = LocalDateTime(2025, 1, 1, 0, 0, 0),
-        capturedAt: LocalDateTime? = null,
-        refundedAt: LocalDateTime? = null
+        currency: String,
+        provider: PaymentProvider,
+        status: PaymentStatus = PaymentStatus.AUTHORIZED,
+        deposit: Double? = null,
     ): Payment
 
-    fun capturePayment(paymentId: Long, capturedAt: LocalDateTime = LocalDateTime(2025, 1, 1, 0, 0, 0)): Payment
+    fun capturePayment(paymentId: Long): Payment
 
-    fun refundPayment(paymentId: Long, refundedAt: LocalDateTime = LocalDateTime(2025, 1, 1, 0, 0, 0)): Payment
+    fun refundPayment(paymentId: Long): Payment
+
+    fun calculateTotalAmount(reservationId: Long, startAt: LocalDateTime): Double
 }
 
 class PaymentsDao :
@@ -31,70 +36,89 @@ class PaymentsDao :
     override fun getEntity(row: ResultRow): Payment {
         return Payment(
             id = row[PaymentsTable.id],
-            reservation_id = row[PaymentsTable.reservation],
+            reservationId = row[PaymentsTable.reservationId],
             amount = row[PaymentsTable.amount],
             currency = row[PaymentsTable.currency],
             provider = row[PaymentsTable.provider],
             status = row[PaymentsTable.status],
-            authorized_at = row[PaymentsTable.authorized_at],
-            captured_at = row[PaymentsTable.captured_at],
-            refunded_at = row[PaymentsTable.refunded_at],
+            deposit = row[PaymentsTable.deposit],
         )
     }
 
     override fun createEntity(entity: Payment, statement: UpdateBuilder<Int>) {
-        statement[PaymentsTable.id] = entity.id
-        statement[PaymentsTable.reservation] = entity.reservation_id
+        statement[PaymentsTable.reservationId] = entity.reservationId
         statement[PaymentsTable.amount] = entity.amount
         statement[PaymentsTable.currency] = entity.currency
         statement[PaymentsTable.provider] = entity.provider
         statement[PaymentsTable.status] = entity.status
-        statement[PaymentsTable.authorized_at] = entity.authorized_at
-        statement[PaymentsTable.captured_at] = entity.captured_at
-        statement[PaymentsTable.refunded_at] = entity.refunded_at
+        statement[PaymentsTable.deposit] = entity.deposit
     }
 
     override fun findByReservation(reservationId: Long): List<Payment> {
-        return findAll().filter { it.reservation_id == reservationId }
+        return findAll().filter { it.reservationId == reservationId }
     }
 
     override fun createPayment(
         reservationId: Long,
         amount: Double,
-        currency: Char,
-        provider: String,
-        status: String,
-        authorizedAt: LocalDateTime,
-        capturedAt: LocalDateTime?,
-        refundedAt: LocalDateTime?
+        currency: String,
+        provider: PaymentProvider,
+        status: PaymentStatus,
+        deposit: Double?,
     ): Payment {
         val payment = Payment(
-            id = 0L,
-            reservation_id = reservationId,
+            reservationId = reservationId,
             amount = amount,
             currency = currency,
             provider = provider,
             status = status,
-            authorized_at = authorizedAt,
-            captured_at = capturedAt ?: authorizedAt,
-            refunded_at = refundedAt ?: authorizedAt,
+            deposit = deposit,
         )
         create(payment)
-        val inserted = findAll().maxByOrNull { it.id }!!
-        return inserted
+        return findAll().maxByOrNull { it.id }!!
     }
 
-    override fun capturePayment(paymentId: Long, capturedAt: LocalDateTime): Payment {
+    override fun capturePayment(paymentId: Long): Payment {
         val payment = findById(paymentId) ?: throw Exception("Payment not found")
-        updateProperty(paymentId, "status", "CAPTURED")
-        updateProperty(paymentId, "captured_at", capturedAt)
-        return payment.copy(status = "CAPTURED", captured_at = capturedAt)
+        updateProperty(paymentId, "status", PaymentStatus.CAPTURED)
+        return payment.copy(status = PaymentStatus.CAPTURED)
     }
 
-    override fun refundPayment(paymentId: Long, refundedAt: LocalDateTime): Payment {
+    override fun refundPayment(paymentId: Long): Payment {
         val payment = findById(paymentId) ?: throw Exception("Payment not found")
-        updateProperty(paymentId, "status", "REFUNDED")
-        updateProperty(paymentId, "refunded_at", refundedAt)
-        return payment.copy(status = "REFUNDED", refunded_at = refundedAt)
+        updateProperty(paymentId, "status", PaymentStatus.REFUNDED)
+        return payment.copy(status = PaymentStatus.REFUNDED)
+    }
+
+    override fun calculateTotalAmount(
+        reservationId: Long,
+        startAt: LocalDateTime,
+    ): Double {
+        val reservation = ReservationsDao().findById(reservationId)
+            ?: throw Exception("Reservation not found")
+
+        val vehicleId = reservation.vehicleId
+            ?: throw Exception("Vehicle ID not found in reservation")
+
+        val pricePerHour = VehicleDao().findById(vehicleId)
+            ?.pricePerDay
+            ?.div(24.0)
+            ?: 0.0
+
+        val tz = TimeZone.currentSystemDefault()
+        val zoneId = ZoneId.of(tz.id)
+
+        // Use java.time for timestamp math to avoid deprecated/experimental kotlinx.datetime Instant APIs.
+        val startMillis = startAt.toJavaLocalDateTime().atZone(zoneId).toInstant().toEpochMilli()
+        val endMillis = (reservation.endAt ?: startAt)
+            .toJavaLocalDateTime()
+            .atZone(zoneId)
+            .toInstant()
+            .toEpochMilli()
+
+        val elapsedMillis = (endMillis - startMillis).coerceAtLeast(0L)
+        val durationHours = max(1, ceil(elapsedMillis / 3_600_000.0).toInt())
+
+        return durationHours * pricePerHour
     }
 }

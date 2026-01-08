@@ -19,21 +19,16 @@ class VehicleRepositoryTest {
 
     private val vehicleDao = VehicleDao()
     private var vehicle = Vehicle(
-        make = "Toyota",
-        model = "Corolla",
-        year = 2020,
-        category = "Sedan",
-        seats = 5,
-        range = 600.0,
         licensePlate = "TEST-PLATE",
+        rangeKm = 600,
         status = VehicleStatus.AVAILABLE,
-        location = 1L,
         ownerId = 1L,
         photoPath = "[]",
-        totalYearlyUsageKilometers = 0L,
-        tco = 0.0,
         beginAvailable = LocalDateTime.parse("2020-01-01T00:00:00"),
         endAvailable = LocalDateTime.parse("2020-12-31T00:00:00"),
+        longitude = 4.0,
+        latitude = 52.0,
+        pricePerDay = 50.0,
     )
 
     private val userDao = UserDao()
@@ -82,9 +77,6 @@ class VehicleRepositoryTest {
         val createdUser: User = userDao.findByUsername(user.username)
             ?: error ("User '${user.username}' should exist after signup")
 
-        /*val seededUser = user.copy(id = createdUser.id, password = createdUser.password)
-        user = seededUser*/
-
         // Vehicle
         client.get("/vehicle")
 
@@ -110,20 +102,20 @@ class VehicleRepositoryTest {
     fun testCreateVehicle() = withConfiguredApp {
         val found = vehicleDao.findById(vehicle.id)
         assertNotNull(found)
-        assertEquals("Toyota", found.make)
+        assertEquals(vehicle.licensePlate, found.licensePlate)
     }
 
     @Test
     fun testFindById() = withConfiguredApp {
         val found = vehicleDao.findById(vehicle.id)
         assertNotNull(found)
-        assertEquals("Toyota", found.make)
+        assertEquals(vehicle.licensePlate, found.licensePlate)
     }
 
     @Test
     fun testFindAll() = withConfiguredApp {
         val allVehicles = vehicleDao.findAll()
-        assertTrue(allVehicles.any { it.id == vehicle.id && it.make == "Toyota" })
+        assertTrue(allVehicles.any { it.id == vehicle.id && it.licensePlate == vehicle.licensePlate })
     }
 
     @Test

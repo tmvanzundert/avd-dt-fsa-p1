@@ -1,115 +1,68 @@
 package com.example.models
 
-import com.example.models.RentalContractTable.vehicleId
 import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
-import org.jetbrains.exposed.v1.core.*
-import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.core.ResultRow
 import org.jetbrains.exposed.v1.core.statements.UpdateBuilder
-import kotlin.time.Clock
-import kotlin.time.ExperimentalTime
 
-interface VehicleRepository: CrudRepository<Vehicle, Long> {
+interface VehicleRepository : CrudRepository<Vehicle, Long> {
     fun isAvailable(vehicleId: Long): Boolean
-    fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int = 15): Double
-    fun consumptionExpenses(vehicleId: Long): Double
-    fun calculateYearlyKilometers(vehicleId: Long)
     fun findByTimeAvailable(beginDate: LocalDateTime, endDate: LocalDateTime): List<Vehicle>
+    fun setLocation(vehicleId: Long, longitude: Double, latitude: Double)
 }
 
-class VehicleDao: CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRepository {
+class VehicleDao : CrudDAO<Vehicle, Long, VehicleTable>(VehicleTable), VehicleRepository {
 
-    // Check if a vehicle is available
     override fun isAvailable(vehicleId: Long): Boolean {
         val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
         return vehicle.status == VehicleStatus.AVAILABLE
     }
 
-    // Calculate the yearly Total Cost of Ownership
-    override fun calculateYearlyTCO(vehicleId: Long, purchasePrice: Double, energyConsumption: Int, energyPrice: Double, maintenance: Double, insurance: Double, tax: Double, depreciateInYears: Int): Double {
-        val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
-
-        val depreciation = purchasePrice / depreciateInYears
-        val energyCost = vehicle.totalYearlyUsageKilometers / 100 * energyConsumption * energyPrice
-
-        val cost = depreciation + maintenance + insurance + tax + energyCost
-
-        updateProperty(vehicleId, "tco", cost)
-
-        return cost
-    }
-
-    // Calculate how much the vehicle consumes in expenses per kilometer
-    override fun consumptionExpenses(vehicleId: Long): Double {
-        val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
-
-        val rentalContracts: List<RentalContract> = RentalContractDao().findAll()
-        val rentalContract: RentalContract = rentalContracts.find{ it.vehicleId == vehicle.id } ?: throw Exception("Rental contract not found")
-
-        val ratePlans: List<RatePlan> = RatePlanDao().findAll()
-        val ratePlan: RatePlan = ratePlans.find{ it.rentalContractId == rentalContract.id } ?: throw Exception("Rate plan not found")
-
-        return (rentalContract.dropoffOdometer - rentalContract.pickupOdometer) / ratePlan.pricePerKm
-    }
-
-    // Calculate how many kilometers the vehicle has driven in a year
-    override fun calculateYearlyKilometers(vehicleId: Long) {
-        val vehicle: Vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
-        val rentalContracts: List<RentalContract> = RentalContractDao().findAll()
-        val rentalContract: RentalContract = rentalContracts.find{ it.vehicleId == vehicle.id } ?: throw Exception("Rental contract not found")
-
-        val yearlyUsage: Long = rentalContract.dropoffOdometer - rentalContract.pickupOdometer
-        updateProperty(vehicle.id, "totalYearlyUsageKilometers", yearlyUsage)
-    }
-
-    @OptIn(ExperimentalTime::class)
-    override fun findByTimeAvailable(
-        beginDate: LocalDateTime,
-        endDate: LocalDateTime
-    ): List<Vehicle> {
+    override fun findByTimeAvailable(beginDate: LocalDateTime, endDate: LocalDateTime): List<Vehicle> {
         val vehicles: List<Vehicle> = findAll()
-        return vehicles.filter { beginDate <= it.beginAvailable &&  endDate >= it.endAvailable }
+        return vehicles.filter { v ->
+            val from = v.beginAvailable
+            val to = v.endAvailable
+            from != null && to != null && beginDate >= from && endDate <= to
+        }
     }
 
-    // Map all the database columns to the Vehicle data class
-    override fun getEntity(row: ResultRow): Vehicle {
-        return Vehicle(
-            id = row[VehicleTable.id],
-            make = row[VehicleTable.make],
-            model = row[VehicleTable.model],
-            year = row[VehicleTable.year],
-            category = row[VehicleTable.category],
-            seats = row[VehicleTable.seats],
-            range = row[VehicleTable.range],
-            licensePlate = row[VehicleTable.licensePlate],
-            location = row[VehicleTable.location],
-            photoPath = row[VehicleTable.photoPath],
-            totalYearlyUsageKilometers = row[VehicleTable.totalYearlyUsageKilometers],
-            ownerId = row[VehicleTable.ownerId],
-            tco = row[VehicleTable.tco],
-            beginAvailable = row[VehicleTable.beginAvailable],
-            endAvailable = row[VehicleTable.endAvailable]
+    override fun setLocation(vehicleId: Long, longitude: Double, latitude: Double) {
+        val vehicle = findById(vehicleId) ?: throw Exception("Vehicle not found")
+        update(
+            vehicle.copy(
+                longitude = longitude,
+                latitude = latitude
+            )
         )
     }
 
-    // Prepare a statement to create or update an entity in the database
+    override fun getEntity(row: ResultRow): Vehicle {
+        return Vehicle(
+            id = row[VehicleTable.id],
+            rangeKm = row[VehicleTable.rangeKm],
+            licensePlate = row[VehicleTable.licensePlate],
+            status = row[VehicleTable.status],
+            longitude = row[VehicleTable.longitude],
+            latitude = row[VehicleTable.latitude],
+            ownerId = row[VehicleTable.ownerId],
+            beginAvailable = row[VehicleTable.beginAvailable],
+            endAvailable = row[VehicleTable.endAvailable],
+            pricePerDay = row[VehicleTable.pricePerDay],
+            photoPath = row[VehicleTable.photoPath],
+        )
+    }
+
     override fun createEntity(entity: Vehicle, statement: UpdateBuilder<Int>) {
-        statement[VehicleTable.id] = entity.id
-        statement[VehicleTable.make] = entity.make
-        statement[VehicleTable.model] = entity.model
-        statement[VehicleTable.year] = entity.year
-        statement[VehicleTable.category] = entity.category
-        statement[VehicleTable.seats] = entity.seats
-        statement[VehicleTable.range] = entity.range
         statement[VehicleTable.licensePlate] = entity.licensePlate
-        statement[VehicleTable.location] = entity.location
+        statement[VehicleTable.rangeKm] = entity.rangeKm
+        statement[VehicleTable.status] = entity.status
+        statement[VehicleTable.longitude] = entity.longitude
+        statement[VehicleTable.latitude] = entity.latitude
         statement[VehicleTable.ownerId] = entity.ownerId
-        statement[VehicleTable.photoPath] = entity.photoPath
-        statement[VehicleTable.totalYearlyUsageKilometers] = entity.totalYearlyUsageKilometers
-        statement[VehicleTable.tco] = entity.tco
         statement[VehicleTable.beginAvailable] = entity.beginAvailable
         statement[VehicleTable.endAvailable] = entity.endAvailable
+        statement[VehicleTable.pricePerDay] = entity.pricePerDay
+        statement[VehicleTable.photoPath] = entity.photoPath
     }
 
 }
