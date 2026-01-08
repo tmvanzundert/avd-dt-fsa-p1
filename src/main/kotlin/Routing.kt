@@ -34,6 +34,12 @@ fun SignupRequest.toUser(userDao: UserDao): User {
 @Serializable
 data class LoginRequest(val username: String, val password: String)
 
+@Serializable
+data class AuthResponse(
+    val token: String,
+    val userId: Long
+)
+
 fun Application.configureRouting(jwtConfig: JWTConfig) {
     val userDao = UserDao()
     val vehicleDao = VehicleDao()
@@ -68,9 +74,13 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
                 return@post call.respondText("$e")
             }
 
+            // Fetch created user so we can return its id
+            val createdUser = userDao.findByUsername(user.username)
+                ?: return@post call.respondText("Failed to create user")
+
             // Generate JWT token for the new user and return it
-            val token = generateToken(config = jwtConfig, username = user.username)
-            return@post call.respond(mapOf("token" to token))
+            val token = generateToken(config = jwtConfig, username = createdUser.username)
+            return@post call.respond(AuthResponse(token = token, userId = createdUser.id))
         }
 
         post("/login") {
@@ -93,7 +103,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
 
             // Generate the JWT token and return to the request
             val token = generateToken(config = jwtConfig, username = username)
-            return@post call.respond(mapOf("token" to token))
+            return@post call.respond(AuthResponse(token = token, userId = findUser.id))
         }
 
         authenticate("jwt-auth") {

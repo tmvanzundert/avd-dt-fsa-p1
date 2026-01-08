@@ -9,8 +9,12 @@ Content-Type: application/json
 
 > {%
 client.global.set("token", response.body.token);
+client.global.set("userId", response.body.userId);
 client.test("login returns token", function() {
   client.assert(!!client.global.get("token"), "token missing from login response");
+});
+client.test("login returns userId", function() {
+  client.assert(!!client.global.get("userId"), "userId missing from login response");
 });
 %}
 

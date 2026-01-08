@@ -88,9 +88,9 @@ fun Route.reservationsRoutes(
         )
     }
 
-    post("/reservation/myhistory/{userId}") {
+    get("/reservation/myhistory/{userId}") {
         val userId = call.parameters["userId"]?.toLongOrNull()
-            ?: return@post call.respond(
+            ?: return@get call.respond(
                 HttpStatusCode.BadRequest,
                 "Invalid or missing user ID"
             )
@@ -106,9 +106,9 @@ fun Route.reservationsRoutes(
         )
     }
 
-    post("/reservation/myrentals/{userId}") {
+    get("/reservation/myrentals/{userId}") {
         val userId = call.parameters["userId"]?.toLongOrNull()
-            ?: return@post call.respond(
+            ?: return@get call.respond(
                 HttpStatusCode.BadRequest,
                 "Invalid or missing user ID"
             )

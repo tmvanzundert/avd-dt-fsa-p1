@@ -20,7 +20,10 @@ Content-Type: application/json
   "password": "userroutingtestpass"
 }
 
-> {% client.global.set("bearerToken", response.body.token); %}
+> {%
+  client.global.set("bearerToken", response.body.token);
+  client.global.set("userId", response.body.userId);
+%}
 
 ### Get all vehicles
 GET http://localhost:8085/vehicle

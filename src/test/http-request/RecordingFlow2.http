@@ -20,7 +20,10 @@ Content-Type: application/json
   "password": "userroutingtestpass"
 }
 
-> {% client.global.set("bearerToken", response.body.token); %}
+> {%
+  client.global.set("bearerToken", response.body.token);
+  client.global.set("userId", response.body.userId);
+%}
 
 ### Set car for rent for a period of time
 GET http://localhost:8085/vehicle/available/1/2022-01-01T00:00:00/2026-01-01T00:00:00

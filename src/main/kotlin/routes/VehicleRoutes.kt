@@ -27,9 +27,7 @@ data class VehicleLocation(
 @Serializable
 data class ChangeVehicleStatusRequest(
     val status: VehicleStatus,
-    /** Optional: only meaningful when setting status to AVAILABLE in current domain model. */
     val beginAvailable: LocalDateTime? = null,
-    /** Optional: only meaningful when setting status to AVAILABLE in current domain model. */
     val endAvailable: LocalDateTime? = null,
 )
 
@@ -44,13 +42,6 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
         delete()
     }
 
-    /**
-     * Change vehicle status.
-     *
-     * POST /vehicle/{id}/status
-     * Body:
-     * { "status": "AVAILABLE", "beginAvailable": "2026-01-04T10:00", "endAvailable": "2026-01-04T18:00" }
-     */
     post("/vehicle/{id}/status") {
         val id = call.parameters["id"]?.toLongOrNull()
             ?: return@post call.respondText(

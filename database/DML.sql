@@ -1,27 +1,28 @@
 USE plugandplay;
 
--- Insert users (password: 12345)
+-- Insert users
 INSERT INTO users (
+    id,
     first_name,
     last_name,
     username,
-    address,
-    role,
-    phone,
     password,
     email,
     rating,
+    phone,
+    role,
     created_at,
     birth_date,
     driver_license_number,
+    address,
     avatar_path
 )
 VALUES
-('John', 'Doe', 'johndoe', 'Stationsplein 1, 4811 BB Breda', 'CUSTOMER', '0612345678', '$2a$10$eLeweRk91sc8O8e8sJC/DOGZBqABgOZ3MDRHzKfr4ybz0q9ouHdOu', 'johndoe@example.com', 4.5, NOW(), '1990-01-01', 'D1234567890', ''),
-('Sanne', 'Jansen', 'sannej', 'Grote Markt 38, 4811 XS Breda', 'CUSTOMER', '0623456789', '$2a$10$eLeweRk91sc8O8e8sJC/DOGZBqABgOZ3MDRHzKfr4ybz0q9ouHdOu', 'sannej@example.com', 4.8, NOW(), '1985-05-15', 'J9876543210', ''),
-('Pieter', 'de Vries', 'pieterv', 'Haagweg 334, 4813 XE Amsterdam', 'CUSTOMER', '0634567890', '$2a$10$eLeweRk91sc8O8e8sJC/DOGZBqABgOZ3MDRHzKfr4ybz0q9ouHdOu', 'pieterv@example.com', 4.7, NOW(), '1992-09-21', 'V1122334455', '');
+(1, 'Henk', 'de Vries', 'hdevries', '$2a$10$ouC/BX19GxcB6NTgOKpXjejWWyiZfEpqM7mrR/iFniAiJH2WETHGK', 'hdevries@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Markendaalseweg 131, 4811 KW Breda', NULL),
+(2, 'Sanne', 'van den Broek', 'svdbroek', '$2a$10$8FFMYG12cQNryzEmrQrptO/ULm7699GE4QRBDwAV5O/ctV2cUVkva', 'svdbroek@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Fellenoordstraat 97, 4811 TH Breda', NULL),
+(3, 'John', 'Halsema', 'jhalsema', '$2a$10$G6mXAVwycEvBnAtC8dCOyOfT3CrR6UTqEPS7Cd3Xjve1FTPixIj7m', 'jhalsema@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Eindstraat 15-17, 4811 KK Breda', NULL);
 
---- Insert vehicles
+-- Insert vehicles
 INSERT INTO vehicles (
     range_km,
     license_plate,
@@ -35,18 +36,9 @@ INSERT INTO vehicles (
     photo_path
 )
 VALUES
-    (491, 'NL-BR-01', 'AVAILABLE', 4.77596, 51.58656, 1, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 80.00, '[]'),
-    (533, 'NL-BR-02', 'AVAILABLE', 4.77596, 51.58656, 2, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 90.00, '[]'),
-    (455, 'NL-BR-03', 'AVAILABLE', 4.77596, 51.58656, 3, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 70.00, '[]'),
-    (484, 'NL-BR-04', 'AVAILABLE', 4.77596, 51.58656, 2, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 75.00, '[]'),
-    (426, 'NL-BR-05', 'AVAILABLE', 4.77596, 51.58656, 1, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 72.50, '[]'),
-    (520, 'NL-BR-06', 'AVAILABLE', 4.77596, 51.58656, 3, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 88.00, '[]'),
-    (395, 'NL-BR-07', 'AVAILABLE', 4.77596, 51.58656, 3, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 60.00, '[]'),
-    (270, 'NL-BR-08', 'AVAILABLE', 4.77596, 51.58656, 2, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 55.00, '[]'),
-    (362, 'NL-BR-09', 'AVAILABLE', 4.77596, 51.58656, 1, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 65.00, '[]'),
-    (476, 'NL-BR-10', 'AVAILABLE', 4.77596, 51.58656, 2, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 95.00, '[]'),
-    (590, 'NL-BR-11', 'AVAILABLE', 4.77596, 51.58656, 1, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 110.00, '[]'),
-    (520, 'NL-BR-12', 'AVAILABLE', 4.77596, 51.58656, 3, '2025-01-01 00:00:00', '2026-01-31 00:00:00', 105.00, '[]');
+    (491, '1XZL27', 'AVAILABLE', 4.78090, 51.58710, 1, '2026-01-01 00:00:00', '2026-01-13 00:00:00', 80.00, '[]'),
+    (533, 'KK596K', 'AVAILABLE', 4.79910, 51.58810, 2, '2026-01-10 00:00:00', '2026-01-16 00:00:00', 90.00, '[]'),
+    (455, 'NG431D', 'AVAILABLE', 4.82550, 51.59030, 3, '2026-01-20 00:00:00', '2026-01-31 00:00:00', 70.00, '[]');
 
 
 -- Insert a reservation
@@ -56,7 +48,9 @@ INSERT INTO reservations (
     start_at,
     end_at,
     status,
-    total_amount
+    total_amount,
+    photo_vehicle_before,
+    photo_vehicle_after
 ) VALUES (
-    1, 1, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00
+    1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, NULL, NULL
 );
