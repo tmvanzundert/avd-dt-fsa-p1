@@ -95,14 +95,14 @@ fun Route.reservationsRoutes(
                 "Invalid or missing user ID"
             )
 
-        val vehicles = reservationsDao.getVehicleReservations(userId, listOf(
+        val reservations: List<Reservations> = reservationsDao.getVehicleReservations(userId, listOf(
             ReservationStatus.CANCELLED,
             ReservationStatus.COMPLETED
         ))
 
         call.respond(
             HttpStatusCode.OK,
-            vehicles
+            reservations
         )
     }
 
@@ -113,14 +113,14 @@ fun Route.reservationsRoutes(
                 "Invalid or missing user ID"
             )
 
-        val vehicles = reservationsDao.getVehicleReservations(userId, listOf(
+        val reservations: List<Reservations> = reservationsDao.getVehicleReservations(userId, listOf(
             ReservationStatus.PENDING,
             ReservationStatus.CONFIRMED
         ))
 
         call.respond(
             status = HttpStatusCode.OK,
-            message = vehicles
+            message = reservations
         )
     }
 }

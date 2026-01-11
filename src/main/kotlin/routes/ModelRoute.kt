@@ -93,7 +93,7 @@ abstract class ModelRoute<Dao, Entity : Any>(
                 executeDaoFun(dao, "update", entityObject)
                 call.respond(HttpStatusCode.OK, entityObject.toString())
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.NotFound, e.message ?: "$nameCap not found")
+                call.respond(HttpStatusCode.BadRequest, e.message ?: "$nameCap not found")
             }
         }
     }
@@ -110,7 +110,7 @@ abstract class ModelRoute<Dao, Entity : Any>(
                 executeDaoFun(dao, "delete", id)
                 call.respond(HttpStatusCode.NoContent)
             } catch (e: Exception) {
-                call.respond(HttpStatusCode.NotFound, e.message ?: "$nameCap not found")
+                call.respond(HttpStatusCode.BadRequest, e.message ?: "$nameCap not found")
             }
         }
     }
