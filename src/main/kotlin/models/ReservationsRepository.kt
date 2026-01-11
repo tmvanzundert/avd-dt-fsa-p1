@@ -11,7 +11,7 @@ interface ReservationsRepository : CrudRepository<Reservations, Long> {
     fun getCarReservationStatus(vehicleId: Long): String
     fun makeCarReservable(vehicleId: Long)
     fun cancelReservation(reservationId: Long)
-    fun getVehicleReservations(renterId: Long, status: List<ReservationStatus>): List<Vehicle>
+    fun getVehicleReservations(renterId: Long, status: List<ReservationStatus>): List<Reservations>
 }
 
 class ReservationsDao :
@@ -102,11 +102,7 @@ class ReservationsDao :
         vehicleDao.updateProperty(vehicleId, "status", VehicleStatus.AVAILABLE)
     }
 
-    override fun getVehicleReservations(renterId: Long, status: List<ReservationStatus>): List<Vehicle> {
-        val vehicleDao = VehicleDao()
-        val reservations = findAll().filter { it.userId == renterId && status.contains(it.status) }
-        return reservations.mapNotNull { reservation ->
-            reservation.vehicleId?.let { vehicleDao.findById(it) }
-        }
+    override fun getVehicleReservations(renterId: Long, status: List<ReservationStatus>): List<Reservations> {
+        return findAll().filter { it.userId == renterId && status.contains(it.status) }
     }
 }
