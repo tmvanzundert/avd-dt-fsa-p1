@@ -1,0 +1,17 @@
+### Get my cars (for logged-in user)
+GET http://localhost:8085/vehicle/mycars
+Authorization: Bearer {{bearerToken}}
+
+> {%
+  // Assert status is 200 or 204
+  if (response.status === 200) {
+    // Assert response is a list of vehicles
+    const vehicles = response.body;
+    client.assert(Array.isArray(vehicles), 'Response should be an array');
+    // Optionally check that all vehicles have ownerId matching userId
+    vehicles.forEach(v => client.assert(v.ownerId === client.global.get('userId'), 'Vehicle ownerId should match logged-in user'));
+  } else {
+    client.assert(response.status === 204, 'Status should be 204 if no vehicles');
+  }
+%}
+

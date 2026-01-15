@@ -16,8 +16,8 @@ POST http://localhost:8085/login
 Content-Type: application/json
 
 {
-  "username": "userroutingapitestuser",
-  "password": "userroutingtestpass"
+  "username": "hdevries",
+  "password": "12345"
 }
 
 > {%
