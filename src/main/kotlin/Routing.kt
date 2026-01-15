@@ -17,7 +17,8 @@ data class SignupRequest (
     val username: String,
     val address: String,
     val email: String,
-    val password: String
+    val password: String,
+    val phone: String
 )
 
 fun SignupRequest.toUser(userDao: UserDao): User {
@@ -27,7 +28,8 @@ fun SignupRequest.toUser(userDao: UserDao): User {
         username = this.username,
         address = this.address,
         email = this.email,
-        password = userDao.hashPassword(this.password)
+        password = userDao.hashPassword(this.password),
+        phone = this.phone
     )
 }
 
