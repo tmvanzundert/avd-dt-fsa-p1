@@ -8,7 +8,8 @@ Content-Type: application/json
   "firstName": "test",
   "lastName": "user",
   "address": "testuser straat 1",
-  "email": "userrouting@apitestuser.nl"
+  "email": "userrouting@apitestuser.nl",
+  "phone": "0612345678"
 }
 
 ### Login and get Bearer token
@@ -45,7 +46,24 @@ Authorization: Bearer {{bearerToken}}
   "firstName": "Testing",
   "lastName": "Test",
   "address": "Hoogstraten 14",
-  "email": "john@example.com"
+  "email": "john@example.com",
+  "phone": "0612345678"
+}
+
+### Update user
+POST http://localhost:8085/user/5
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+{
+  "id": 5,
+  "username": "updatedUser",
+  "password": "newPassword123",
+  "firstName": "Updated",
+  "lastName": "User",
+  "address": "Nieuwe Straat 10",
+  "email": "updatedUser@example.com",
+  "phone": "0698765432"
 }
 
 ### Delete user

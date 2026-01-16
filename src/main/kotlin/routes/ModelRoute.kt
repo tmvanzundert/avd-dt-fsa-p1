@@ -77,17 +77,17 @@ abstract class ModelRoute<Dao, Entity : Any>(
     }
 
     override fun Route.update() {
-        put("/$name/{id}") {
+        post("/$name/{id}") {
             val id = call.parameters["id"]?.toLongOrNull()
             if (id == null) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid $name ID")
-                return@put
+                return@post
             }
 
             val entityObject = call.receive(entityClass)
             if (getObjectName(entityObject, "id") != id) {
                 call.respond(HttpStatusCode.BadRequest, "$nameCap ID mismatch")
-                return@put
+                return@post
             }
             try {
                 executeDaoFun(dao, "update", entityObject)
