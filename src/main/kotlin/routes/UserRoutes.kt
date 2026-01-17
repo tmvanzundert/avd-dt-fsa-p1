@@ -3,6 +3,8 @@ package com.example.routes
 import com.example.models.User
 import com.example.models.UserDao
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.authenticate
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respondText
 import io.ktor.server.routing.*
@@ -10,7 +12,29 @@ import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
 class UserRoute(entityClass: KClass<User>, override val dao: UserDao) : ModelRoute<UserDao, User>("user", entityClass) {
-
+    override fun Route.update() {
+        authenticate("jwt-auth") {
+            put("/user") {
+                val principal = call.principal<User>()
+                if (principal == null) {
+                    call.respondText("Missing or invalid JWT token", status = HttpStatusCode.Unauthorized)
+                    return@put
+                }
+                val userId = principal.id
+                val entityObject = call.receive(User::class)
+                if (entityObject.id != userId) {
+                    call.respondText("User ID mismatch: can only update your own profile", status = HttpStatusCode.BadRequest)
+                    return@put
+                }
+                try {
+                    dao.update(entityObject)
+                    call.respondText(entityObject.toString(), status = HttpStatusCode.OK)
+                } catch (e: Exception) {
+                    call.respondText(e.message ?: "User not found", status = HttpStatusCode.BadRequest)
+                }
+            }
+        }
+    }
 }
 
 @Serializable

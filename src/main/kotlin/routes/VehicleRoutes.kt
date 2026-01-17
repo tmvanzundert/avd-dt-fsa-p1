@@ -4,6 +4,7 @@ import com.example.models.Vehicle
 import com.example.models.VehicleDao
 import com.example.models.VehicleStatus
 import io.ktor.http.HttpStatusCode
+import io.ktor.server.auth.principal
 import io.ktor.server.request.receive
 import io.ktor.server.response.respond
 import io.ktor.server.response.respondText
@@ -129,6 +130,20 @@ fun Route.vehicleRoutes(vehicleDao: VehicleDao) {
             HttpStatusCode.OK,
             "Vehicle $id location updated to (${body.longitude}, ${body.latitude})"
         )
+    }
+
+    get("/vehicle/mycars") {
+        val user = call.principal<com.example.models.User>()
+            ?: return@get call.respondText(
+                "Unauthorized: User not authenticated",
+                status = HttpStatusCode.Unauthorized,
+            )
+        val vehicles = vehicleDao.findAll().filter { it.ownerId == user.id }
+        if (vehicles.isEmpty()) {
+            call.respond(HttpStatusCode.NoContent)
+        } else {
+            call.respond(vehicles)
+        }
     }
 
 }

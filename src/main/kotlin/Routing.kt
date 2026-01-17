@@ -81,7 +81,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
                 ?: return@post call.respondText("Failed to create user")
 
             // Generate JWT token for the new user and return it
-            val token = generateToken(config = jwtConfig, username = createdUser.username)
+            val token = generateToken(config = jwtConfig, username = createdUser.username, userId = createdUser.id)
             return@post call.respond(AuthResponse(token = token, userId = createdUser.id))
         }
 
@@ -104,7 +104,7 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
             }
 
             // Generate the JWT token and return to the request
-            val token = generateToken(config = jwtConfig, username = username)
+            val token = generateToken(config = jwtConfig, username = username, userId = findUser.id)
             return@post call.respond(AuthResponse(token = token, userId = findUser.id))
         }
 

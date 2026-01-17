@@ -19,11 +19,12 @@ data class JWTConfig(
 )
 
 // Generate a JWT token
-fun generateToken(config: JWTConfig, username: String): String =
+fun generateToken(config: JWTConfig, username: String, userId: Long): String =
     JWT.create()
         .withAudience(config.audience)
         .withIssuer(config.issuer)
         .withClaim("username", username)
+        .withClaim("userId", userId)
         .withExpiresAt(Date(System.currentTimeMillis() + config.tokenExpiry))
         .sign(Algorithm.HMAC256(config.secret))
 
@@ -41,12 +42,9 @@ fun Application.configureJWTAuthentication(config: JWTConfig) {
             )
 
             validate { credential ->
-                // Basic audience check; add more checks if you need (e.g., subject, custom claims)
-                if (credential.payload.getClaim("username").asString() != "") {
-                    JWTPrincipal(credential.payload)
-                } else {
-                    null
-                }
+                val userId = credential.payload.getClaim("userId").asLong()
+                val user = com.example.models.UserDao().findById(userId)
+                user // return User object as principal
             }
 
             challenge { _, _ ->

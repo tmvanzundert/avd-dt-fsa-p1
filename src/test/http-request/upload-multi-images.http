@@ -37,7 +37,7 @@ Authorization: Bearer {{bearerToken}}
   "status": "AVAILABLE",
   "location": 1,
   "ownerId": 1,
-  "photoPath": "/path/to/photo.jpg",
+  "photoPath": "/path/to/photo.jpg"
 }
 
 ### Upload multiple images for car
