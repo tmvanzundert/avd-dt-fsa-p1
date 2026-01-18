@@ -42,7 +42,7 @@ data class User constructor(
     val phone: String? = null,
     val password: String,
     val email: String,
-    val rating: Float? = 0.0f,
+    val rating: Float? = 5.0f,
     val createdAt: LocalDateTime? = null,
     val birthDate: LocalDate? = null,
     val driverLicenseNumber: String? = null,
