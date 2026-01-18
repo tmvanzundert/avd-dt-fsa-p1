@@ -8,6 +8,14 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.2.20"
 }
 
+// Ktor's Gradle plugin may apply Java base plugins. We don't need Java compilation here.
+pluginManager.withPlugin("java") {
+    tasks.withType<JavaCompile>().configureEach { enabled = false }
+}
+pluginManager.withPlugin("java-base") {
+    tasks.matching { it.name == "compileJava" }.configureEach { enabled = false }
+}
+
 group = "com.example"
 version = "0.0.1"
 

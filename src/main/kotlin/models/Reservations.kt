@@ -24,8 +24,8 @@ object ReservationTable: Table("reservations") {
     // DDL: DECIMAL(12,2)
     val totalAmount: Column<Double?> = double("total_amount").nullable()
 
-    val photoVehicleBefore: Column<String?> = varchar("photo_vehicle_before", 255).nullable()
-    val photoVehicleAfter: Column<String?> = varchar("photo_vehicle_after", 255).nullable()
+    // NOTE: The database schema (database/DDL.sql) does not define photo columns for reservations.
+    // Do not add them here unless you also add them to the DB, otherwise Exposed will SELECT them and crash.
 
     override val primaryKey: PrimaryKey = PrimaryKey(id)
 }
@@ -39,8 +39,6 @@ data class Reservations(
     val endAt: LocalDateTime? = null,
     val status: ReservationStatus = ReservationStatus.PENDING,
     val totalAmount: Double? = null,
-    val photoVehicleBefore: String? = null,
-    val photoVehicleAfter: String? = null,
 )
 
 @Serializable

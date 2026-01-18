@@ -48,9 +48,7 @@ INSERT INTO reservations (
     start_at,
     end_at,
     status,
-    total_amount,
-    photo_vehicle_before,
-    photo_vehicle_after
+    total_amount
 ) VALUES (
-    1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00, NULL, NULL
+    1, 2, '2025-11-02 10:00:00', '2025-11-04 10:00:00', 'CONFIRMED', 320.00
 );

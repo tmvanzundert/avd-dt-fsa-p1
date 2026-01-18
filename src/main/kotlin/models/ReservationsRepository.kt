@@ -27,8 +27,6 @@ class ReservationsDao :
             endAt = row[ReservationTable.endAt],
             status = row[ReservationTable.status],
             totalAmount = row[ReservationTable.totalAmount],
-            photoVehicleBefore = row[ReservationTable.photoVehicleBefore],
-            photoVehicleAfter = row[ReservationTable.photoVehicleAfter],
         )
     }
 
@@ -39,8 +37,6 @@ class ReservationsDao :
         statement[ReservationTable.endAt] = entity.endAt
         statement[ReservationTable.status] = entity.status
         statement[ReservationTable.totalAmount] = entity.totalAmount
-        statement[ReservationTable.photoVehicleBefore] = entity.photoVehicleBefore
-        statement[ReservationTable.photoVehicleAfter] = entity.photoVehicleAfter
     }
 
     override fun reserveCar(carId: Long, userId: Long, startTime: LocalDateTime, endTime: LocalDateTime) {
