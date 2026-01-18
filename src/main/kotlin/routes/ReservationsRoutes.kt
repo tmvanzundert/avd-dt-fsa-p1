@@ -14,7 +14,7 @@ import kotlinx.datetime.LocalDateTime
 import kotlinx.serialization.Serializable
 import kotlin.reflect.KClass
 
-class ReservationsRoute(entityClass: KClass<Reservations>, override val dao: ReservationsDao) : ModelRoute<ReservationsDao, Reservations>("user", entityClass) {
+class ReservationsRoute(entityClass: KClass<Reservations>, override val dao: ReservationsDao) : ModelRoute<ReservationsDao, Reservations>("reservation", entityClass) {
 
 }
 
@@ -33,7 +33,7 @@ fun Route.reservationsRoutes(
         delete()
     }
 
-    post("/reservation") {
+    /*post("/reservation") {
         val request = call.receive<CreateReservationRequest>()
 
         val user = userDao.findByUsername(request.userName)
@@ -48,7 +48,7 @@ fun Route.reservationsRoutes(
         )
 
         call.respond(HttpStatusCode.OK, responseBody)
-    }
+    }*/
 
     post("/reservation/{id}/{userId}/{startTime}/{endTime}") {
         val id = call.parameters["id"]?.toLongOrNull()
