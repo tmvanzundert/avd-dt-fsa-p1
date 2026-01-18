@@ -167,6 +167,7 @@ fun Route.imageRoutes() {
             entityExists = { vehicleId -> vehicleDao.findById(vehicleId) != null },
             persistPaths = { vehicleId, paths ->
                 val json = Json.encodeToString(ListSerializer(String.serializer()), paths)
+                // Pass the DAO/Table property name (camelCase) rather than interpolating the Column object.
                 vehicleDao.updateProperty(vehicleId, "photoPath", json)
             },
         )
@@ -182,6 +183,7 @@ fun Route.imageRoutes() {
             maxFiles = 1,
             entityExists = { userId -> userDao.findById(userId) != null },
             persistPaths = { userId, paths ->
+                // Use property name 'avatarPath' so updateProperty resolves the correct column.
                 userDao.updateProperty(userId, "avatarPath", paths.first())
             },
         )
