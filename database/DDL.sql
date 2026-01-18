@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS users (
     username VARCHAR(80) NOT NULL UNIQUE,
     password VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
-    rating REAL,
+    rating REAL DEFAULT 5,
     phone VARCHAR(32),
     role ENUM('ADMIN', 'CUSTOMER') DEFAULT 'CUSTOMER',
     created_at TIMESTAMP,
@@ -77,19 +77,4 @@ CREATE TABLE IF NOT EXISTS reviews (
     review_date TIMESTAMP,
     FOREIGN KEY (renter_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (owner_id) REFERENCES users(id) ON DELETE CASCADE ON UPDATE CASCADE
-);
-
-/*ruimte voor verandering*/
-CREATE TABLE IF NOT EXISTS driving_details (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    renter_id BIGINT,
-    vehicle_id BIGINT,
-    latitude DECIMAL(10, 7),
-    longitude DECIMAL(10, 7),
-    max_speed_kmh INT,
-    battery_level_percent INT,
-    total_kilometers BIGINT,
-    acceleration DECIMAL(5,2),
-    FOREIGN KEY (renter_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
-    FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE SET NULL ON UPDATE CASCADE
 );

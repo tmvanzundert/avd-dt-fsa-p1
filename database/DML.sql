@@ -18,9 +18,9 @@ INSERT INTO users (
     avatar_path
 )
 VALUES
-(1, 'Henk', 'de Vries', 'hdevries', '$2a$10$ouC/BX19GxcB6NTgOKpXjejWWyiZfEpqM7mrR/iFniAiJH2WETHGK', 'hdevries@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Markendaalseweg 131, 4811 KW Breda', NULL),
-(2, 'Sanne', 'van den Broek', 'svdbroek', '$2a$10$8FFMYG12cQNryzEmrQrptO/ULm7699GE4QRBDwAV5O/ctV2cUVkva', 'svdbroek@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Fellenoordstraat 97, 4811 TH Breda', NULL),
-(3, 'John', 'Halsema', 'jhalsema', '$2a$10$G6mXAVwycEvBnAtC8dCOyOfT3CrR6UTqEPS7Cd3Xjve1FTPixIj7m', 'jhalsema@gmail.com', 0, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Eindstraat 15-17, 4811 KK Breda', NULL);
+(1, 'Henk', 'de Vries', 'hdevries', '$2a$10$ouC/BX19GxcB6NTgOKpXjejWWyiZfEpqM7mrR/iFniAiJH2WETHGK', 'hdevries@gmail.com', 5, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Markendaalseweg 131, 4811 KW Breda', NULL),
+(2, 'Sanne', 'van den Broek', 'svdbroek', '$2a$10$8FFMYG12cQNryzEmrQrptO/ULm7699GE4QRBDwAV5O/ctV2cUVkva', 'svdbroek@gmail.com', 5, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Fellenoordstraat 97, 4811 TH Breda', NULL),
+(3, 'John', 'Halsema', 'jhalsema', '$2a$10$G6mXAVwycEvBnAtC8dCOyOfT3CrR6UTqEPS7Cd3Xjve1FTPixIj7m', 'jhalsema@gmail.com', 5, NULL, 'CUSTOMER', NULL, NULL, NULL, 'Eindstraat 15-17, 4811 KK Breda', NULL);
 
 -- Insert vehicles
 INSERT INTO vehicles (
