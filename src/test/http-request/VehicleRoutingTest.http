@@ -8,7 +8,9 @@ Content-Type: application/json
   "firstName": "test",
   "lastName": "user",
   "address": "testuser straat 1",
-  "email": "userrouting@apitestuser.nl"
+  "email": "userrouting@apitestuser.nl",
+  "phone": "0612345678",
+  "createdAt": "2024-01-01T00:00:00Z"
 }
 
 ### Login and get Bearer token
@@ -16,8 +18,8 @@ POST http://localhost:8085/login
 Content-Type: application/json
 
 {
-  "username": "userroutingapitestuser",
-  "password": "userroutingtestpass"
+  "username": "hdevries",
+  "password": "12345"
 }
 
 > {%
@@ -58,3 +60,17 @@ Authorization: Bearer {{bearerToken}}
 ### Delete vehicle
 DELETE http://localhost:8085/vehicle/5
 Authorization: Bearer {{bearerToken}}
+
+### Create a reservation
+POST http://localhost:8085/reservation
+Content-Type: application/json
+Authorization: Bearer {{bearerToken}}
+
+{
+  "userId": 1,
+  "vehicleId": 2,
+  "startAt": "2026-01-20T11:08",
+  "endAt": "2026-01-22T11:08",
+  "status": "PENDING",
+  "totalAmount": 140.0
+}

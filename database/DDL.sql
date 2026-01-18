@@ -51,8 +51,6 @@ CREATE TABLE IF NOT EXISTS reservations (
     end_at TIMESTAMP,
     status ENUM('PENDING', 'CONFIRMED', 'CANCELLED', 'COMPLETED') DEFAULT 'PENDING',
     total_amount DECIMAL(12,2),
-    photo_vehicle_before VARCHAR(255),
-    photo_vehicle_after VARCHAR(255),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL ON UPDATE CASCADE,
     FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE RESTRICT ON UPDATE CASCADE
 );
