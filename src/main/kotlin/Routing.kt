@@ -5,6 +5,8 @@ import io.ktor.server.response.*
 import com.example.models.*
 import com.example.routes.*
 import io.ktor.server.auth.authenticate
+import io.ktor.server.http.content.files
+import io.ktor.server.http.content.static
 import io.ktor.server.request.receive
 import io.ktor.server.routing.*
 import kotlinx.datetime.LocalDateTime
@@ -52,6 +54,10 @@ fun Application.configureRouting(jwtConfig: JWTConfig) {
     val paymentsDao = PaymentsDao()
 
     routing {
+        // Expose static files under /uploads
+        static("/uploads") {
+            files("uploads")
+        }
 
         post("/signup") {
 
